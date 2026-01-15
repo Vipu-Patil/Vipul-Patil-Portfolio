@@ -38,3 +38,48 @@ export const metrics = [
   { value: "2w → 3d", label: "release cycle with MLOps pipelines", where: "Capgemini" },
 ];
 
+export const experience = [
+  {
+    company: "Centene Corporation",
+    role: "AI Engineer",
+    location: "Boston, MA",
+    start: "Jun 2025",
+    end: "Present",
+    blurb: "Fraud detection and retrieval for healthcare claims.",
+    bullets: [
+      "Shipped a classical ML fraud-detection system end to end, from noisy claims data through feature engineering (ICD/CPT codes, claim frequency, provider billing behavior) and evaluation, raising precision-recall AUC by 28% over baseline.",
+      "Took the model to production as a real-time scoring service (Python, FastAPI) with the adjudication team, taking manual work off 12 adjudicators and cutting their review queue by 40%.",
+      "Built retrieval and similarity search (embeddings, FAISS, Pinecone, custom retrievers) over claims and policy records, giving adjusters historical context in seconds instead of manual searches across siloed systems.",
+      "Balanced latency and reliability on AWS (EC2, Lambda, S3) with health checks and automated rollback, sustaining 99.7% uptime for real-time scoring endpoints.",
+    ],
+    tags: ["XGBoost", "Feature Engineering", "PR-AUC Evaluation", "Python", "FastAPI", "REST APIs", "Embeddings", "FAISS", "Pinecone", "AWS"],
+  },
+  {
+    company: "Capgemini",
+    role: "AI Software Engineer",
+    location: "Pune, India",
+    start: "Jan 2023",
+    end: "Aug 2023",
+    blurb: "LLM apps, RAG and real-time risk scoring for financial services.",
+    bullets: [
+      "Built a LLaMA-based LLM application for a financial-services client that drafts risk summaries and compliance reports from case data with human oversight, halving analysts’ documentation time on regulatory audits.",
+      "Built a RAG system over fragmented financial case data using embeddings and a vector database, making fraud investigators’ case-history research 40% faster than keyword search.",
+      "Built latency-critical ML serving backends in Python and C++ for real-time transaction risk scoring, handling 10K+ transactions/min at sub-200 ms during peak load.",
+      "Built MLOps pipelines (MLflow, Docker, GitHub Actions CI/CD) for training, validation, versioning and deployment, cutting release cycles from 2 weeks to 3 days.",
+    ],
+    tags: ["LLM Apps", "RAG", "Embeddings", "Human-in-the-Loop", "Python", "C++", "MLflow", "Docker", "GitHub Actions", "Git"],
+  },
+  {
+    company: "PharmaPro",
+    role: "Data Science Intern",
+    location: "Mumbai, India",
+    start: "Feb 2022",
+    end: "May 2022",
+    blurb: "ETL pipelines that turned unstructured data into clean datasets.",
+    bullets: [
+      "Turned messy, unstructured data from PDFs, web sources and internal records into clean datasets with Python ETL pipelines, cutting processing time from 2 hours to under 10 minutes (~92%), and presented the results directly to the CEO.",
+    ],
+    tags: ["Python"],
+  },
+];
+
