@@ -83,3 +83,34 @@ export const experience = [
   },
 ];
 
+export const projects = [
+  {
+    name: "IncidentIQ",
+    kicker: "Agentic investigation system + evaluation suite",
+    date: "Sep 2026",
+    url: "https://github.com/Vipu-Patil",
+    stack: ["Python", "LangGraph", "LangSmith", "FastAPI", "PostgreSQL/pgvector", "Ollama", "Docker", "AWS"],
+    bullets: [
+      "An agent that retrieves runbooks with embeddings and pgvector similarity search, then calls tools for logs, metrics and deployment data to write evidence-backed root-cause reports.",
+      "An evaluation benchmark for root-cause accuracy and robustness to adversarial prompt injection, with error analysis on LangSmith traces to find and fix failures across retrieval, prompts and tools.",
+      "Runs on a self-hosted model stack (Ollama) to weigh cost and data control against hosted-API quality.",
+    ],
+    tags: ["LangGraph", "LangSmith", "Tool Calling", "Embeddings", "RAG", "pgvector", "PostgreSQL", "Offline Evals", "Adversarial Testing", "Error Analysis", "FastAPI", "Python", "Docker", "AWS"],
+    color: "accent",
+  },
+  {
+    name: "AI Banking Workflow Agent",
+    kicker: "LLM agent for multi-step finance operations",
+    date: "Aug 2026",
+    url: "https://github.com/Vipu-Patil",
+    stack: ["Python", "TypeScript", "React", "FastAPI", "Gemini API", "Playwright", "LangChain", "PostgreSQL"],
+    bullets: [
+      "Executes multi-step financial operations workflows end to end, grounding every action in verified page elements so it can’t hallucinate steps.",
+      "Built-in finance controls: deterministic replay for auditability, checkpoints, and human approval for sensitive actions.",
+      "Hardened against real failures in error handling and rate-limit recovery.",
+    ],
+    tags: ["LLM Apps", "Tool Calling", "Human-in-the-Loop", "Auditability", "Python", "TypeScript", "React", "FastAPI", "PostgreSQL", "REST APIs"],
+    color: "highlight",
+  },
+];
+
