@@ -114,3 +114,22 @@ export const projects = [
   },
 ];
 
+export const skills = [
+  { group: "Machine Learning", items: ["XGBoost", "Feature Engineering", "PR-AUC Evaluation", "Error Analysis", "Hugging Face"] },
+  { group: "Retrieval & LLMs", items: ["Embeddings", "RAG", "FAISS", "Pinecone", "pgvector", "LLM Apps", "LangGraph", "Tool Calling", "Prompt Engineering"] },
+  { group: "Evaluation & Controls", items: ["Offline Evals", "Adversarial Testing", "LangSmith", "Human-in-the-Loop", "Auditability"] },
+  { group: "Software", items: ["Python", "TypeScript", "SQL", "C++", "FastAPI", "React", "REST APIs", "PostgreSQL", "MongoDB", "Apache Spark"] },
+  { group: "Production & MLOps", items: ["AWS", "Docker", "Kubernetes", "Git", "GitHub Actions", "MLflow", "Prometheus"] },
+];
+
+export const education = [
+  {
+    school: "Northeastern University",
+    degree: "Master of Science, Computer Science",
+    location: "Boston, MA",
+    end: "May 2025",
+    notes: [],
+  },
+  // Add your undergraduate degree here, e.g.
+  // { school: "…", degree: "Bachelor of …", location: "…", end: "…", notes: [] },
+];
