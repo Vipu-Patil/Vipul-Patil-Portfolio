@@ -88,7 +88,7 @@ export const projects = [
     name: "IncidentIQ",
     kicker: "Agentic investigation system + evaluation suite",
     date: "Sep 2026",
-    url: "https://github.com/Vipu-Patil",
+    url: "https://github.com/Vipu-Patil/IncidentIQ",
     stack: ["Python", "LangGraph", "LangSmith", "FastAPI", "PostgreSQL/pgvector", "Ollama", "Docker", "AWS"],
     bullets: [
       "An agent that retrieves runbooks with embeddings and pgvector similarity search, then calls tools for logs, metrics and deployment data to write evidence-backed root-cause reports.",
@@ -102,7 +102,7 @@ export const projects = [
     name: "AI Banking Workflow Agent",
     kicker: "LLM agent for multi-step finance operations",
     date: "Aug 2026",
-    url: "https://github.com/Vipu-Patil",
+    url: "https://github.com/Vipu-Patil/AI-Banking-Computer-Use-Agent",
     stack: ["Python", "TypeScript", "React", "FastAPI", "Gemini API", "Playwright", "LangChain", "PostgreSQL"],
     bullets: [
       "Executes multi-step financial operations workflows end to end, grounding every action in verified page elements so it can’t hallucinate steps.",
