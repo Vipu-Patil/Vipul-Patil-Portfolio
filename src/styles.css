@@ -116,7 +116,7 @@ p { margin: 0; }
 /* Portrait: a tilted print pinned over the model card */
 .portrait {
   margin: 0; position: relative; z-index: 2; width: clamp(170px, 42vw, 250px); max-width: 100%;
-  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 6px; padding: 10px 10px 8px;
+  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 6px; padding: 10px;
   box-shadow: 6px 6px 0 var(--highlight); transform: rotate(-3deg);
   transition: transform .4s cubic-bezier(.2,.8,.2,1);
 }
@@ -126,7 +126,7 @@ p { margin: 0; }
   background: color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 2px;
 }
 .portrait img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 3px; }
-.portrait figcaption { color: var(--muted); padding-top: 7px; text-align: center; }
+
 .hero-copy { display: grid; gap: 22px; min-width: 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--muted); letter-spacing: 0.02em; }
 .pulse { width: 9px; height: 9px; border-radius: 50%; background: #22b573; position: relative; }

@@ -178,7 +178,6 @@ function Hero() {
       </div>
       <figure className="portrait">
         <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
-        <figcaption className="mono small">fig. 1 · {profile.firstName.toLowerCase()}.jpg</figcaption>
       </figure>
       <aside className="model-card" aria-label="Model card">
         <div className="mc-head mono">
