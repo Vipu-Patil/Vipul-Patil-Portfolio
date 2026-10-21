@@ -106,7 +106,27 @@ p { margin: 0; }
 
 /* Hero */
 .hero { display: grid; gap: 40px; padding-block: 64px 40px; align-items: center; }
-@media (min-width: 900px) { .hero { grid-template-columns: 1.35fr 1fr; padding-block: 88px 48px; } }
+@media (min-width: 900px) {
+  .hero { grid-template-columns: 1.35fr 1fr; grid-template-rows: auto auto; padding-block: 72px 48px; column-gap: 56px; row-gap: 0; }
+  .hero-copy { grid-row: 1 / span 2; }
+  .portrait { justify-self: center; margin-bottom: -34px; }
+}
+@media (max-width: 899px) { .portrait { order: -1; justify-self: start; } }
+
+/* Portrait: a tilted print pinned over the model card */
+.portrait {
+  margin: 0; position: relative; z-index: 2; width: clamp(170px, 42vw, 250px); max-width: 100%;
+  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 6px; padding: 10px 10px 8px;
+  box-shadow: 6px 6px 0 var(--highlight); transform: rotate(-3deg);
+  transition: transform .4s cubic-bezier(.2,.8,.2,1);
+}
+.portrait:hover { transform: rotate(1deg) scale(1.03); }
+.portrait::before {
+  content: ""; position: absolute; top: -12px; left: 50%; width: 76px; height: 22px; transform: translateX(-50%) rotate(2deg);
+  background: color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 2px;
+}
+.portrait img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 3px; }
+.portrait figcaption { color: var(--muted); padding-top: 7px; text-align: center; }
 .hero-copy { display: grid; gap: 22px; min-width: 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--muted); letter-spacing: 0.02em; }
 .pulse { width: 9px; height: 9px; border-radius: 50%; background: #22b573; position: relative; }
