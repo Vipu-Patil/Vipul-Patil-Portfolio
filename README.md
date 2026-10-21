@@ -16,9 +16,3 @@ I take ML and AI systems from messy, real-world financial and healthcare data al
 **Skills:** Python · ML · RAG & embeddings · LLM apps & agents · evaluation · FastAPI · React · AWS · Docker · MLOps
 
 📫 [patil.vipu.2001@gmail.com](mailto:patil.vipu.2001@gmail.com) · [LinkedIn](https://linkedin.com/in/vipulpat02) · [GitHub](https://github.com/Vipu-Patil)
-
----
-
-
-
-Deploys as a static site on Vercel, Netlify or GitHub Pages (build command `npm run build`, output directory `dist`).
