@@ -19,23 +19,6 @@ I take ML and AI systems from messy, real-world financial and healthcare data al
 
 ---
 
-## About this site
 
-A playful single-page portfolio built with **React + Vite**. It includes:
-
-- **"Ask my resume":** a tiny in-browser retriever (TF-IDF + cosine similarity) that answers visitors' questions with the most relevant lines from my resume, a small nod to my RAG work
-- An **ML "model card"** about me in the hero section
-- **Interactive skills:** tap a skill to highlight the jobs and projects that use it
-- Light and dark themes, and a layout that works on mobile
-
-All content lives in [`src/data.js`](src/data.js).
-
-## Run locally
-
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # production build in dist/
-```
 
 Deploys as a static site on Vercel, Netlify or GitHub Pages (build command `npm run build`, output directory `dist`).
