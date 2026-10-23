@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { profile, metrics, experience, projects, skills, education } from "./data.js";
+import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
@@ -24,6 +24,7 @@ function buildIndex() {
     ...projects.flatMap((p) => p.bullets.map((b) => ({ source: `Project · ${p.name}`, text: b, extra: p.stack.join(" ") }))),
     ...education.map((ed) => ({ source: "Education", text: `${ed.degree}, ${ed.school} (${ed.location}), ${ed.end}.`, extra: "masters degree school university graduated study" })),
     ...skills.map((g) => ({ source: `Skills · ${g.group}`, text: `${g.group}: ${g.items.join(", ")}` })),
+    ...pillars.flatMap((p) => p.proof.map((t) => ({ source: `What I do · ${p.role}`, text: t, extra: `${p.role} ${p.line}` }))),
   ];
   const docs = chunks.map((c) => tokenize(`${c.text} ${c.extra || ""}`));
   const df = new Map();
@@ -60,7 +61,7 @@ function buildIndex() {
   };
 }
 
-const SUGGESTIONS = ["fraud detection", "RAG and vector search", "agents with human approval", "MLOps and deployment", "latency at scale", "education"];
+const SUGGESTIONS = ["backend APIs and latency", "automation and CI/CD", "AI agents", "fraud detection", "RAG and vector search", "education"];
 
 function AskMyResume() {
   const search = useMemo(buildIndex, []);
@@ -135,6 +136,7 @@ function Nav() {
           VP<span className="dot" />
         </a>
         <nav className="nav-links" aria-label="Sections">
+          <a href="#what">What I do</a>
           <a href="#work">Work</a>
           <a href="#projects">Projects</a>
           <a href="#skills">Skills</a>
@@ -165,6 +167,11 @@ function Hero() {
           <br />
           {profile.headline}
         </h1>
+        <ul className="roles" aria-label="Roles">
+          {profile.roles.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
         <p className="lede">{profile.summary}</p>
         <div className="cta-row">
           <a className="btn primary" href="#projects">See projects</a>
@@ -193,6 +200,32 @@ function Hero() {
           ))}
         </dl>
       </aside>
+    </section>
+  );
+}
+
+function WhatIDo() {
+  return (
+    <section className="wrap section pillars-section">
+      <SectionTitle id="what" kicker="What I do" title="One engineer, three hats" note="Each claim below comes from a system I shipped." />
+      <div className="pillars">
+        {pillars.map((p) => (
+          <article className="pillar" key={p.role}>
+            <h3>{p.role}</h3>
+            <p className="pillar-line">{p.line}</p>
+            <ul>
+              {p.proof.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+            <div className="tags">
+              {p.stack.map((t) => (
+                <span key={t} className="tag">{t}</span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -416,7 +449,7 @@ function Contact() {
     <section className="contact" id="contact">
       <div className="wrap contact-inner">
         <p className="mono small kicker">Contact</p>
-        <h2>Building something with ML or agents? Let’s talk.</h2>
+        <h2>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
         <div className="email-row">
           <span id="email-text" className="email">{profile.email}</span>
           <button className="btn primary" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
@@ -440,6 +473,7 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <WhatIDo />
         <div className="wrap">
           <AskMyResume />
         </div>
