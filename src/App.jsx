@@ -605,6 +605,7 @@ export default function App() {
         <span className="blob b1" />
         <span className="blob b2" />
         <span className="blob b3" />
+        <span className="bg-grid" />
         <Field />
       </div>
       <Nav />
