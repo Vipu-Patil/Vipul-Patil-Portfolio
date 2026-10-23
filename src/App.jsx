@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 
@@ -22,7 +22,7 @@ function buildIndex() {
     { source: "Summary", text: profile.summary },
     ...experience.flatMap((e) => e.bullets.map((b) => ({ source: `${e.role} · ${e.company}`, text: b }))),
     ...projects.flatMap((p) => p.bullets.map((b) => ({ source: `Project · ${p.name}`, text: b, extra: p.stack.join(" ") }))),
-    ...education.map((ed) => ({ source: "Education", text: `${ed.degree}, ${ed.school} (${ed.location}), ${ed.end}.`, extra: "masters degree school university graduated study" })),
+    ...education.map((ed) => ({ source: "Education", text: `${ed.degree}, ${ed.school} (${ed.location}), ${ed.start} – ${ed.end}.`, extra: "masters degree school university graduated study" })),
     ...skills.map((g) => ({ source: `Skills · ${g.group}`, text: `${g.group}: ${g.items.join(", ")}` })),
     ...pillars.flatMap((p) => p.proof.map((t) => ({ source: `What I do · ${p.role}`, text: t, extra: `${p.role} ${p.line}` }))),
   ];
@@ -258,80 +258,177 @@ function SectionTitle({ id, kicker, title, note }) {
 
 const lit = (tags, active) => (!active ? "" : tags.includes(active) ? "is-lit" : "is-dim");
 
+const reduceMotion = () =>
+  typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Adds `in` to an element the first time it scrolls into view. */
+function useInView() {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, inView];
+}
+
+/* Decodes text from random glyphs when `play` turns true. */
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/{}[]#*+=";
+function Scramble({ text, play }) {
+  const [out, setOut] = useState(text);
+  useEffect(() => {
+    if (!play || reduceMotion()) {
+      setOut(text);
+      return;
+    }
+    let frame = 0;
+    const total = 26;
+    let raf;
+    const tick = () => {
+      frame += 1;
+      const done = Math.floor((frame / total) * text.length);
+      setOut(
+        text
+          .split("")
+          .map((ch, i) => (i < done || ch === " " ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
+          .join("")
+      );
+      if (frame < total) raf = requestAnimationFrame(tick);
+      else setOut(text);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [play, text]);
+  return (
+    <span aria-label={text}>
+      <span aria-hidden="true">{out}</span>
+    </span>
+  );
+}
+
+/* Cursor spotlight for cards. */
+const spot = (ev) => {
+  const r = ev.currentTarget.getBoundingClientRect();
+  ev.currentTarget.style.setProperty("--mx", `${ev.clientX - r.left}px`);
+  ev.currentTarget.style.setProperty("--my", `${ev.clientY - r.top}px`);
+};
+
+function Job({ e, i, active, open, onToggle }) {
+  const [ref, inView] = useInView();
+  return (
+    <li ref={ref} className={`job reveal ${inView ? "in" : ""} ${lit(e.tags, active)}`} style={{ "--i": i }}>
+      <div className="job-when mono small">
+        <span className="node" aria-hidden="true" />
+        {e.start} – {e.end}
+      </div>
+      <div className="job-body holo" onPointerMove={spot}>
+        <span className="scanline" aria-hidden="true" />
+        <button className="job-head" onClick={onToggle} aria-expanded={open}>
+          <span>
+            <span className="job-role"><Scramble text={e.role} play={inView} /></span>
+            <span className="job-co">
+              {e.company} · {e.location}
+            </span>
+            <span className="job-blurb muted">{e.blurb}</span>
+          </span>
+          <span className={`plus ${open ? "open" : ""}`} aria-hidden="true" />
+        </button>
+        <div className={`job-more ${open ? "open" : ""}`}>
+          <div>
+            <ul className="job-bullets">
+              {e.bullets.map((b, j) => (
+                <li key={b} style={{ "--j": j }}>{b}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="tags">
+          {e.tags.map((t, j) => (
+            <span key={t} className={`tag ${t === active ? "on" : ""}`} style={{ "--j": j }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </li>
+  );
+}
+
 function Experience({ active }) {
   const [open, setOpen] = useState(0);
   return (
     <section className="wrap section">
-      <SectionTitle id="work" kicker="Experience" title="Where I’ve shipped" />
+      <SectionTitle id="work" kicker="Experience" title="Where I’ve shipped" note="Tap a role to expand it." />
       <ol className="timeline">
-        {experience.map((e, i) => {
-          const isOpen = open === i;
-          return (
-            <li key={e.company} className={`job ${lit(e.tags, active)}`}>
-              <div className="job-when mono small">
-                {e.start} – {e.end}
-              </div>
-              <div className="job-body">
-                <button className="job-head" onClick={() => setOpen(isOpen ? -1 : i)} aria-expanded={isOpen}>
-                  <span>
-                    <span className="job-role">{e.role}</span>
-                    <span className="job-co">
-                      {e.company} · {e.location}
-                    </span>
-                    <span className="job-blurb muted">{e.blurb}</span>
-                  </span>
-                  <span className={`plus ${isOpen ? "open" : ""}`} aria-hidden="true" />
-                </button>
-                {isOpen && (
-                  <ul className="job-bullets">
-                    {e.bullets.map((b) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-                <div className="tags">
-                  {e.tags.map((t) => (
-                    <span key={t} className={`tag ${t === active ? "on" : ""}`}>{t}</span>
-                  ))}
-                </div>
-              </div>
-            </li>
-          );
-        })}
+        <span className="beam" aria-hidden="true" />
+        {experience.map((e, i) => (
+          <Job key={e.company} e={e} i={i} active={active} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
+        ))}
       </ol>
     </section>
   );
 }
 
-function ProjectCard({ p, active }) {
+function ProjectCard({ p, i, active }) {
+  const [ref, inView] = useInView();
   const onMove = (ev) => {
+    spot(ev);
+    if (reduceMotion()) return;
     const r = ev.currentTarget.getBoundingClientRect();
     const x = (ev.clientX - r.left) / r.width - 0.5;
     const y = (ev.clientY - r.top) / r.height - 0.5;
-    ev.currentTarget.style.setProperty("--rx", `${(-y * 5).toFixed(2)}deg`);
-    ev.currentTarget.style.setProperty("--ry", `${(x * 6).toFixed(2)}deg`);
+    ev.currentTarget.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`);
+    ev.currentTarget.style.setProperty("--ry", `${(x * 8).toFixed(2)}deg`);
   };
   const onLeave = (ev) => {
     ev.currentTarget.style.setProperty("--rx", "0deg");
     ev.currentTarget.style.setProperty("--ry", "0deg");
   };
+  const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   return (
-    <article className={`project ${p.color} ${lit(p.tags, active)}`} onPointerMove={onMove} onPointerLeave={onLeave}>
-      <div className="project-top mono small">
-        <span>{p.date}</span>
-        <a href={p.url} target="_blank" rel="noreferrer">GitHub ↗</a>
+    <article
+      ref={ref}
+      className={`project holo reveal ${inView ? "in" : ""} ${lit(p.tags, active)}`}
+      style={{ "--i": i % 2 }}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+    >
+      <span className="scanline" aria-hidden="true" />
+      <div className="term mono small">
+        <span className="term-dots" aria-hidden="true"><i /><i /><i /></span>
+        <span className="term-path">~/projects/{slug}</span>
+        <span className="term-date">{p.date}</span>
       </div>
-      <h3>{p.name}</h3>
+      <h3><Scramble text={p.name} play={inView} /></h3>
       <p className="project-kicker">{p.kicker}</p>
       <ul>
         {p.bullets.map((b) => (
           <li key={b}>{b}</li>
         ))}
       </ul>
-      <div className="tags">
-        {p.stack.map((t) => (
-          <span key={t} className={`tag ${p.tags.includes(active) && t.includes(active) ? "on" : ""}`}>{t}</span>
-        ))}
+      <div className="project-foot">
+        <div className="tags">
+          {p.stack.map((t, j) => (
+            <span key={t} className={`tag ${p.tags.includes(active) && t.includes(active) ? "on" : ""}`} style={{ "--j": j }}>{t}</span>
+          ))}
+        </div>
+        {p.url && (
+          <a className="repo" href={p.url} target="_blank" rel="noreferrer">
+            View code ↗
+          </a>
+        )}
       </div>
     </article>
   );
@@ -342,8 +439,8 @@ function Projects({ active }) {
     <section className="wrap section">
       <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" />
       <div className="projects">
-        {projects.map((p) => (
-          <ProjectCard key={p.name} p={p} active={active} />
+        {projects.map((p, i) => (
+          <ProjectCard key={p.name} p={p} i={i} active={active} />
         ))}
       </div>
     </section>
@@ -406,7 +503,7 @@ function Education() {
               <h3>{ed.school}</h3>
               <p>{ed.degree}</p>
               <p className="mono small muted">
-                {ed.location} · {ed.end}
+                {ed.location} · {ed.start ? `${ed.start} – ` : ""}{ed.end}
               </p>
               {ed.notes?.length > 0 && (
                 <ul>
@@ -477,9 +574,12 @@ export default function App() {
         <div className="wrap">
           <AskMyResume />
         </div>
-        <Metrics />
-        <Experience active={active} />
-        <Projects active={active} />
+        <div className="lab">
+          <div className="lab-grid" aria-hidden="true" />
+          <Metrics />
+          <Experience active={active} />
+          <Projects active={active} />
+        </div>
         <Skills active={active} setActive={setActive} />
         <Education />
         <Contact />

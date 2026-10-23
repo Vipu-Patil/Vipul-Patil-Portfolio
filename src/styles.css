@@ -357,3 +357,162 @@ h1 { font-size: var(--step-3); font-weight: 800; }
 .pillar-line { color: var(--muted); font-weight: 500; }
 .pillar ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; font-size: 0.95rem; align-content: start; }
 .pillar li::marker { color: var(--accent); }
+
+/* ─────────────────────────────────────────────────────────────
+   LAB: futuristic band for metrics, experience and projects.
+   Deliberately one dark look in both themes; tokens are redefined
+   inside .lab so every component below picks them up.
+   ───────────────────────────────────────────────────────────── */
+@property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+.lab {
+  --bg: #070b1a; --surface: #0d1430; --ink: #e7ecff; --muted: #97a3cc; --line: #1f2a52;
+  --accent: #7d92ff; --accent-ink: #070b1a; --neon: #35e0ff; --glow: rgba(53, 224, 255, 0.16);
+  --band: transparent; --band-ink: var(--ink);
+  color-scheme: dark;
+  position: relative; overflow: hidden; isolation: isolate;
+  color: var(--ink);
+  background:
+    radial-gradient(1100px 520px at 12% 0%, rgba(125, 146, 255, 0.20), transparent 60%),
+    radial-gradient(900px 600px at 92% 55%, rgba(53, 224, 255, 0.10), transparent 60%),
+    var(--bg);
+  padding-bottom: 88px;
+}
+.lab-grid {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(125, 146, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 146, 255, 0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 60%, transparent 100%);
+  animation: grid-drift 14s linear infinite;
+}
+@keyframes grid-drift { to { background-position: 0 44px, 44px 0; } }
+
+.lab .metrics { border-bottom: 1px solid var(--line); }
+.lab .metric-val { text-shadow: 0 0 22px rgba(255, 225, 77, 0.35); }
+
+.lab .kicker { color: var(--neon); }
+.lab .kicker::after { content: "_"; margin-left: 3px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.lab .section-title h2 { text-shadow: 0 0 30px rgba(125, 146, 255, 0.35); }
+
+/* Scroll reveal: cards rise out of a blur, staggered by --i */
+.js-anim .lab .reveal { opacity: 0; translate: 0 28px; filter: blur(6px); }
+.lab .reveal {
+  --d: calc(var(--i, 0) * 130ms);
+  transition:
+    opacity .7s ease var(--d), translate .8s cubic-bezier(.2, .8, .2, 1) var(--d), filter .7s ease var(--d),
+    transform .2s ease-out, border-color .3s, box-shadow .3s;
+}
+.js-anim .lab .reveal.in { opacity: 1; translate: 0 0; filter: none; }
+html .lab .reveal.in.is-dim, .lab .is-dim { opacity: 0.3; filter: saturate(0.3); }
+
+/* Holographic card: animated neon border, cursor spotlight, one-time scan */
+.lab .holo {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 40%), var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+.lab .holo::before {
+  content: ""; position: absolute; inset: 0; width: auto; height: auto; top: 0; right: 0; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--angle), transparent 0 62%, var(--neon) 78%, var(--accent) 88%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s; animation: spin 3.5s linear infinite; pointer-events: none; z-index: 2;
+  transform: none;
+}
+.lab .holo:hover::before, .lab .holo:focus-within::before, .lab .is-lit .holo::before, .lab .holo.is-lit::before { opacity: 1; transform: none; }
+@keyframes spin { to { --angle: 360deg; } }
+.lab .holo::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(280px circle at var(--mx, -400px) var(--my, -400px), rgba(53, 224, 255, 0.13), transparent 65%);
+  opacity: 0; transition: opacity .3s;
+}
+.lab .holo:hover::after { opacity: 1; }
+.scanline {
+  position: absolute; left: 0; right: 0; top: 0; height: 45%; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(53, 224, 255, 0.16) 70%, rgba(53, 224, 255, 0.45) 98%, transparent);
+  translate: 0 -110%;
+}
+.lab .reveal.in .scanline { animation: scan 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--i, 0) * 130ms + .2s) both; }
+@keyframes scan { from { translate: 0 -110%; } to { translate: 0 240%; } }
+
+.lab .tag { background: rgba(125, 146, 255, 0.08); border-color: var(--line); color: #b9c4ee; }
+.lab .tag.on { background: var(--highlight); color: var(--highlight-ink); border-color: var(--highlight); box-shadow: 0 0 14px rgba(255, 225, 77, 0.45); }
+.js-anim .lab .reveal.in .tag { animation: tag-in .45s cubic-bezier(.2, .8, .2, 1) calc(var(--j, 0) * 35ms + var(--i, 0) * 130ms + .45s) both; }
+@keyframes tag-in { from { opacity: 0; translate: 0 8px; } }
+
+/* Timeline with a data beam and glowing nodes */
+.lab .timeline { position: relative; }
+.beam { display: none; }
+@media (min-width: 760px) {
+  .beam {
+    display: block; position: absolute; top: 8px; bottom: 8px; left: calc(9rem + 13px); width: 2px; border-radius: 2px;
+    background: linear-gradient(var(--line), var(--line));
+  }
+  .beam::after {
+    content: ""; position: absolute; left: -1px; width: 4px; height: 140px; top: 0; border-radius: 4px;
+    background: linear-gradient(to bottom, transparent, var(--neon), transparent);
+    box-shadow: 0 0 18px var(--neon); animation: beam 3.6s cubic-bezier(.5, 0, .5, 1) infinite;
+  }
+  .lab .job-when { position: relative; }
+  .node {
+    position: absolute; right: -21px; top: 25px; width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--muted); background: var(--bg); transition: border-color .4s, box-shadow .4s;
+  }
+  .lab .job.in .node { border-color: var(--neon); box-shadow: 0 0 0 4px var(--glow), 0 0 16px var(--neon); animation: node 2.4s ease-in-out infinite; }
+}
+@keyframes beam { 0% { top: -140px; opacity: 0; } 15% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes node { 50% { box-shadow: 0 0 0 7px rgba(53, 224, 255, 0.06), 0 0 24px var(--neon); } }
+.lab .job-when { color: var(--neon); }
+.lab .job-body { background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 40%), var(--surface); }
+.lab .job-role { background: linear-gradient(90deg, var(--ink), #b9c4ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lab .is-lit .job-body, .lab .project.is-lit { border-color: var(--neon); box-shadow: 0 0 0 4px var(--glow), 0 0 40px rgba(53, 224, 255, 0.18); }
+
+/* Smooth expand for job details */
+.job-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.2, .8, .2, 1); }
+.job-more.open { grid-template-rows: 1fr; }
+.job-more > div { overflow: hidden; min-height: 0; }
+.job-more.open li { animation: line-in .45s cubic-bezier(.2, .8, .2, 1) calc(var(--j, 0) * 60ms + .1s) both; }
+@keyframes line-in { from { opacity: 0; translate: -10px 0; } }
+.lab .job-bullets li::marker, .lab .project li::marker { color: var(--neon); }
+.lab .plus { border-color: var(--ink); }
+.lab .plus.open { box-shadow: 0 0 16px rgba(255, 225, 77, 0.5); }
+
+/* Project cards as terminal windows */
+.lab .project {
+  grid-template-rows: auto auto auto 1fr auto; align-content: stretch; gap: 12px;
+  border: 1px solid var(--line);
+}
+.lab .project:hover::before { transform: none; }
+.term {
+  display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--muted);
+  margin: -22px -24px 4px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: rgba(0, 0, 0, 0.28);
+}
+.term-dots { display: flex; gap: 6px; flex: none; }
+.term-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.term-dots i:nth-child(1) { background: var(--neon); }
+.term-dots i:nth-child(2) { background: var(--highlight); }
+.term-dots i:nth-child(3) { background: var(--accent); }
+.term-path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.term-path::after { content: "▍"; color: var(--neon); margin-left: 2px; animation: blink 1s steps(1) infinite; }
+.term-date { flex: none; font-variant-numeric: tabular-nums; }
+.lab .project h3 { font-size: 1.6rem; color: var(--ink); }
+.lab .project-kicker { color: var(--neon); font-weight: 500; font-size: 0.95rem; }
+.project-foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.project-foot .tags { flex: 1 1 260px; min-width: 0; }
+.repo {
+  flex: none; font: 600 0.85rem var(--f-mono); color: var(--ink); text-decoration: none;
+  padding: 8px 14px; border: 1px solid var(--neon); border-radius: 999px;
+  box-shadow: inset 0 0 12px rgba(53, 224, 255, 0.15); transition: background .2s, color .2s, box-shadow .2s;
+}
+.repo:hover { background: var(--neon); color: var(--bg); box-shadow: 0 0 22px rgba(53, 224, 255, 0.55); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .lab .reveal { opacity: 1; translate: none; filter: none; }
+  .lab .reveal.is-dim { opacity: 0.3; }
+  .lab-grid, .beam::after, .scanline { animation: none !important; }
+  .scanline { display: none; }
+}
