@@ -12,6 +12,11 @@
   --glow: rgba(43, 69, 230, 0.14);
   --band: #141c18;
   --band-ink: #eef1ec;
+  --field-node: #2b45e6;
+  --field-hot: #2b45e6;
+  --field-mint: #22b573;
+  --field-alpha: 0.42;
+  --blob-o: 0.20;
 
   --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --f-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -28,14 +33,14 @@
   :root:not([data-theme="light"]) {
     --bg: #0e1311; --surface: #161d1a; --ink: #e5ece7; --muted: #94a39b; --line: #27312c;
     --accent: #7d92ff; --accent-ink: #0e1311; --highlight: #e8c93a; --highlight-ink: #0e1311;
-    --glow: rgba(125, 146, 255, 0.16); --band: #1b2521; --band-ink: #e5ece7;
+    --glow: rgba(125, 146, 255, 0.16); --band: #1b2521; --band-ink: #e5ece7; --field-node: #7d92ff; --field-hot: #e8c93a; --field-alpha: 0.5; --blob-o: 0.13;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0e1311; --surface: #161d1a; --ink: #e5ece7; --muted: #94a39b; --line: #27312c;
   --accent: #7d92ff; --accent-ink: #0e1311; --highlight: #e8c93a; --highlight-ink: #0e1311;
-  --glow: rgba(125, 146, 255, 0.16); --band: #1b2521; --band-ink: #e5ece7;
+  --glow: rgba(125, 146, 255, 0.16); --band: #1b2521; --band-ink: #e5ece7; --field-node: #7d92ff; --field-hot: #e8c93a; --field-alpha: 0.5; --blob-o: 0.13;
   color-scheme: dark;
 }
 
@@ -369,8 +374,9 @@ h1 { font-size: var(--step-3); font-weight: 800; }
   --bg: #070b1a; --surface: #0d1430; --ink: #e7ecff; --muted: #97a3cc; --line: #1f2a52;
   --accent: #7d92ff; --accent-ink: #070b1a; --neon: #35e0ff; --glow: rgba(53, 224, 255, 0.16);
   --band: transparent; --band-ink: var(--ink);
+  --field-node: #7d92ff; --field-hot: #35e0ff; --field-alpha: 0.6;
   color-scheme: dark;
-  position: relative; overflow: hidden; isolation: isolate;
+  position: relative; overflow: hidden; overflow: clip; isolation: isolate;
   color: var(--ink);
   background:
     radial-gradient(1100px 520px at 12% 0%, rgba(125, 146, 255, 0.20), transparent 60%),
@@ -515,4 +521,34 @@ html .lab .reveal.in.is-dim, .lab .is-dim { opacity: 0.3; filter: saturate(0.3);
   .lab .reveal.is-dim { opacity: 0.3; }
   .lab-grid, .beam::after, .scanline { animation: none !important; }
   .scanline { display: none; }
+}
+
+/* ─── Living background ─── */
+.bg-layer { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.field { display: block; pointer-events: none; }
+.bg-layer .field { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lab-field { position: sticky; top: 0; width: 100%; height: 100vh; margin-bottom: -100vh; z-index: -1; }
+.blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: var(--blob-o); will-change: transform; }
+.b1 { width: 46vmax; height: 46vmax; background: var(--accent); top: -16vmax; left: -12vmax; animation: float-a 24s ease-in-out infinite alternate; }
+.b2 { width: 40vmax; height: 40vmax; background: var(--highlight); bottom: -16vmax; right: -10vmax; animation: float-b 28s ease-in-out infinite alternate; }
+.b3 { width: 28vmax; height: 28vmax; background: var(--field-mint); top: 38%; left: 42%; opacity: calc(var(--blob-o) * 0.6); animation: float-c 20s ease-in-out infinite alternate; }
+@keyframes float-a { to { transform: translate(18vw, 22vh) scale(1.15); } }
+@keyframes float-b { to { transform: translate(-22vw, -18vh) scale(0.9); } }
+@keyframes float-c { 0% { transform: translate(-10vw, 10vh); } 50% { transform: translate(14vw, -12vh) scale(1.2); } 100% { transform: translate(-6vw, -4vh); } }
+body { background-image: none; }
+
+.hint { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.hint-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: hint 1.6s ease-in-out infinite; }
+@keyframes hint { 50% { transform: scale(1.8); opacity: .4; } }
+
+/* Playful hero details */
+.roles li { transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); cursor: default; }
+.roles li:hover { transform: translateY(-4px) rotate(-3deg); }
+.roles li:nth-child(2):hover { transform: translateY(-4px) rotate(3deg); }
+.hl { display: inline-block; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.hl:hover { transform: rotate(-4deg) scale(1.06); }
+.metric { cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .hint-dot { animation: none !important; }
 }

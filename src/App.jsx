@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
+import Field from "./Field.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
    A playful nod to the RAG work: visitors type a question and the
@@ -182,6 +183,9 @@ function Hero() {
             </a>
           ))}
         </div>
+        <p className="hint mono small" aria-hidden="true">
+          <span className="hint-dot" /> move your cursor around · click anywhere
+        </p>
       </div>
       <figure className="portrait">
         <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
@@ -567,6 +571,12 @@ export default function App() {
   const [active, setActive] = useState("");
   return (
     <>
+      <div className="bg-layer" aria-hidden="true">
+        <span className="blob b1" />
+        <span className="blob b2" />
+        <span className="blob b3" />
+        <Field />
+      </div>
       <Nav />
       <main>
         <Hero />
@@ -576,6 +586,7 @@ export default function App() {
         </div>
         <div className="lab">
           <div className="lab-grid" aria-hidden="true" />
+          <Field className="lab-field" density={0.75} />
           <Metrics />
           <Experience active={active} />
           <Projects active={active} />
