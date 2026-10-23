@@ -142,7 +142,7 @@ h1 { font-size: var(--step-3); font-weight: 800; }
 .hl::before {
   content: ""; position: absolute; left: -4px; right: -6px; bottom: 0.06em; height: 0.42em; z-index: -1;
   background: var(--highlight); border-radius: 4px; transform: skew(-8deg) rotate(-1deg);
-  transform-origin: left; animation: swipe .7s .2s cubic-bezier(.2,.8,.2,1) both;
+  transform-origin: left; animation: swipe .7s 1s cubic-bezier(.2,.8,.2,1) both;
 }
 @keyframes swipe { from { transform: skew(-8deg) rotate(-1deg) scaleX(0.05); } }
 .lede { font-size: 1.08rem; color: var(--muted); max-width: 62ch; }
@@ -551,4 +551,22 @@ body { background-image: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .blob, .hint-dot { animation: none !important; }
+}
+
+/* ─── Scroll reveal for everything marked [data-reveal] ─── */
+.js-anim [data-reveal] {
+  transition:
+    opacity .8s cubic-bezier(.2, .8, .2, 1) var(--rv-d, 0ms),
+    translate .9s cubic-bezier(.2, .8, .2, 1) var(--rv-d, 0ms),
+    scale .9s cubic-bezier(.3, 1.4, .5, 1) var(--rv-d, 0ms),
+    filter .8s ease var(--rv-d, 0ms),
+    transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .25s, border-color .25s, background .25s;
+}
+.js-anim [data-reveal]:not([data-shown]) { opacity: 0; translate: 0 40px; filter: blur(8px); }
+.js-anim [data-reveal="left"]:not([data-shown]) { translate: -60px 0; }
+.js-anim [data-reveal="right"]:not([data-shown]) { translate: 60px 0; }
+.js-anim [data-reveal="zoom"]:not([data-shown]) { translate: 0 30px; scale: 0.85; }
+.js-anim [data-reveal="pop"]:not([data-shown]) { translate: 0 50px; scale: 0.9; }
+@media (prefers-reduced-motion: reduce) {
+  .js-anim [data-reveal]:not([data-shown]) { opacity: 1; translate: none; scale: none; filter: none; }
 }

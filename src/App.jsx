@@ -70,7 +70,7 @@ function AskMyResume() {
   const results = useMemo(() => (q.trim() ? search(q) : []), [q, search]);
 
   return (
-    <section className="ask" aria-labelledby="ask-title">
+    <section className="ask" aria-labelledby="ask-title" data-reveal="zoom">
       <div className="ask-head">
         <h2 id="ask-title">Ask my resume</h2>
         <p className="mono small muted">A tiny TF-IDF retriever running in your browser. Top 3 chunks by cosine similarity.</p>
@@ -160,21 +160,21 @@ function Hero() {
   return (
     <section className="hero wrap" id="top">
       <div className="hero-copy">
-        <p className="eyebrow mono">
+        <p className="eyebrow mono" data-reveal>
           <span className="pulse" aria-hidden="true" /> {profile.currently} · {profile.location}
         </p>
-        <h1>
+        <h1 data-reveal>
           Hi, I’m <span className="hl">{profile.firstName}</span>.
           <br />
           {profile.headline}
         </h1>
-        <ul className="roles" aria-label="Roles">
+        <ul className="roles" aria-label="Roles" data-reveal>
           {profile.roles.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>
-        <p className="lede">{profile.summary}</p>
-        <div className="cta-row">
+        <p className="lede" data-reveal>{profile.summary}</p>
+        <div className="cta-row" data-reveal>
           <a className="btn primary" href="#projects">See projects</a>
           <a className="btn" href="#contact">Get in touch</a>
           {profile.links.map((l) => (
@@ -183,14 +183,14 @@ function Hero() {
             </a>
           ))}
         </div>
-        <p className="hint mono small" aria-hidden="true">
+        <p className="hint mono small" aria-hidden="true" data-reveal>
           <span className="hint-dot" /> move your cursor around · click anywhere
         </p>
       </div>
-      <figure className="portrait">
+      <figure className="portrait" data-reveal="zoom">
         <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
       </figure>
-      <aside className="model-card" aria-label="Model card">
+      <aside className="model-card" aria-label="Model card" data-reveal="right">
         <div className="mc-head mono">
           <span>MODEL CARD</span>
           <span className="mc-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -214,7 +214,7 @@ function WhatIDo() {
       <SectionTitle id="what" kicker="What I do" title="One engineer, three hats" note="Each claim below comes from a system I shipped." />
       <div className="pillars">
         {pillars.map((p) => (
-          <article className="pillar" key={p.role}>
+          <article className="pillar" key={p.role} data-reveal="pop">
             <h3>{p.role}</h3>
             <p className="pillar-line">{p.line}</p>
             <ul>
@@ -239,7 +239,7 @@ function Metrics() {
     <section className="metrics" aria-label="Results">
       <div className="wrap metrics-row">
         {metrics.map((m) => (
-          <div className="metric" key={m.label}>
+          <div className="metric" key={m.label} data-reveal="pop">
             <div className="metric-val">{m.value}</div>
             <div className="metric-label">{m.label}</div>
             <div className="mono small muted">{m.where}</div>
@@ -252,7 +252,7 @@ function Metrics() {
 
 function SectionTitle({ id, kicker, title, note }) {
   return (
-    <div className="section-title" id={id}>
+    <div className="section-title" id={id} data-reveal="left">
       <p className="mono small kicker">{kicker}</p>
       <h2>{title}</h2>
       {note && <p className="muted">{note}</p>}
@@ -464,7 +464,7 @@ function Skills({ active, setActive }) {
       <SectionTitle id="skills" kicker="Skills" title="The toolbox" note="Tap a skill to light up where I’ve used it on this page." />
       <div className="skill-groups">
         {skills.map((g) => (
-          <div className="skill-group" key={g.group}>
+          <div className="skill-group" key={g.group} data-reveal>
             <h3 className="mono small">{g.group}</h3>
             <div className="chips">
               {g.items.map((s) => (
@@ -476,7 +476,7 @@ function Skills({ active, setActive }) {
           </div>
         ))}
       </div>
-      <div className={`used-in ${active ? "show" : ""}`} aria-live="polite">
+      <div className={`used-in ${active ? "show" : ""}`} aria-live="polite" data-reveal>
         {active ? (
           <>
             <strong>{active}</strong>
@@ -501,7 +501,7 @@ function Education() {
       <SectionTitle id="education" kicker="Education" title="Where I trained" />
       <div className="edu-list">
         {education.map((ed) => (
-          <div className="edu" key={ed.school + ed.degree}>
+          <div className="edu" key={ed.school + ed.degree} data-reveal="left">
             <div className="edu-cap mono" aria-hidden="true">{ed.end.slice(-2)}’</div>
             <div>
               <h3>{ed.school}</h3>
@@ -549,13 +549,13 @@ function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="wrap contact-inner">
-        <p className="mono small kicker">Contact</p>
-        <h2>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
-        <div className="email-row">
+        <p className="mono small kicker" data-reveal>Contact</p>
+        <h2 data-reveal>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
+        <div className="email-row" data-reveal>
           <span id="email-text" className="email">{profile.email}</span>
           <button className="btn primary" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
         </div>
-        <div className="cta-row">
+        <div className="cta-row" data-reveal>
           {profile.links.map((l) => (
             <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer">
               {l.label} ↗
@@ -567,8 +567,38 @@ function Contact() {
   );
 }
 
+/* Reveals every [data-reveal] element as it scrolls into view.
+   Uses a data attribute so React re-renders never undo it. */
+function useScrollReveal() {
+  useEffect(() => {
+    const els = [...document.querySelectorAll("[data-reveal]")];
+    const show = (el) => el.setAttribute("data-shown", "");
+    if (!("IntersectionObserver" in window)) {
+      els.forEach(show);
+      return;
+    }
+    els.forEach((el) => {
+      const sibs = [...el.parentElement.children].filter((c) => c.hasAttribute("data-reveal"));
+      el.style.setProperty("--rv-d", `${Math.min(sibs.indexOf(el), 8) * 110}ms`);
+    });
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            show(en.target);
+            io.unobserve(en.target);
+          }
+        }),
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
 export default function App() {
   const [active, setActive] = useState("");
+  useScrollReveal();
   return (
     <>
       <div className="bg-layer" aria-hidden="true">
@@ -595,7 +625,7 @@ export default function App() {
         <Education />
         <Contact />
       </main>
-      <footer className="wrap footer mono small muted">
+      <footer className="wrap footer mono small muted" data-reveal>
         <span>© {new Date().getFullYear()} {profile.name}</span>
         <span>Built with React</span>
       </footer>
