@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
-import Blueprint from "./Blueprint.jsx";
+import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
    A playful nod to the RAG work: visitors type a question and the
@@ -340,8 +340,16 @@ function Job({ e, i, active, open, onToggle }) {
         <span className="node" aria-hidden="true" />
         {e.start} – {e.end}
       </div>
-      <div className="job-body holo" onPointerMove={spot}>
+      <div className={`job-body holo ${e.system ? "has-bp" : ""}`} onPointerMove={spot}>
         <span className="scanline" aria-hidden="true" />
+        {e.system && (
+          <div className="job-bp bp-sheet" onPointerMove={spot}>
+            <span className="bp-cross" aria-hidden="true" />
+            {e.stamp && <span className="bp-stamp mono" aria-hidden="true">{e.stamp}</span>}
+            <SystemBlueprint system={e.system} play={inView} />
+          </div>
+        )}
+        <div className="job-main">
         <button className="job-head" onClick={onToggle} aria-expanded={open}>
           <span>
             <span className="job-role"><Scramble text={e.role} play={inView} /></span>
@@ -365,6 +373,7 @@ function Job({ e, i, active, open, onToggle }) {
           {e.tags.map((t, j) => (
             <span key={t} className={`tag ${t === active ? "on" : ""}`} style={{ "--j": j }}>{t}</span>
           ))}
+        </div>
         </div>
       </div>
     </li>

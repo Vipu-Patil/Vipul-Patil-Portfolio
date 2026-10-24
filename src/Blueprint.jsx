@@ -122,3 +122,122 @@ export default function Blueprint({ kind, play }) {
     </svg>
   );
 }
+
+/* ───────────────────────────────────────────────────────────────
+   System blueprints for the experience section: an architecture
+   sketch of what was built at each job. Numbers come from the resume.
+   Node kinds: box, db (cylinder), doc (folded page).
+   ─────────────────────────────────────────────────────────────── */
+const SYSTEMS = {
+  centene: {
+    title: "SYS-01 · CLAIM SCORING PLATFORM",
+    zone: { x: 206, y: 14, w: 108, h: 176, label: "AWS · 99.7% UPTIME" },
+    nodes: [
+      { id: "claims", kind: "doc", x: 10, y: 34, w: 74, h: 40, label: "Claims", sub: "ICD / CPT" },
+      { id: "members", kind: "db", x: 10, y: 122, w: 74, h: 44, label: "Members", sub: "policy data" },
+      { id: "spark", kind: "box", x: 112, y: 78, w: 76, h: 42, label: "Spark + SQL", sub: "8h → 90m" },
+      { id: "score", kind: "box", x: 216, y: 30, w: 88, h: 46, label: "FastAPI score", sub: "XGBoost +28%" },
+      { id: "rag", kind: "box", x: 216, y: 120, w: 88, h: 46, label: "RAG search", sub: "FAISS·Pinecone" },
+      { id: "team", kind: "box", x: 328, y: 78, w: 64, h: 42, label: "Adjusters", sub: "queue −40%" },
+    ],
+    edges: [["claims", "spark"], ["members", "spark"], ["spark", "score"], ["spark", "rag"], ["score", "team"], ["rag", "team"]],
+  },
+  capgemini: {
+    title: "SYS-02 · REAL-TIME RISK SCORING",
+    zone: { x: 10, y: 176, w: 380, h: 20, label: "CI/CD · 6 SERVICES · 2W → 3D", band: true },
+    nodes: [
+      { id: "tx", kind: "doc", x: 10, y: 26, w: 76, h: 40, label: "Transactions", sub: "10K+/min" },
+      { id: "cases", kind: "db", x: 10, y: 110, w: 76, h: 46, label: "Case data", sub: "siloed" },
+      { id: "risk", kind: "box", x: 132, y: 26, w: 84, h: 40, label: "Risk engine", sub: "C++ · Python" },
+      { id: "llm", kind: "box", x: 132, y: 112, w: 84, h: 42, label: "RAG + LLaMA", sub: "docs −50%" },
+      { id: "api", kind: "box", x: 242, y: 68, w: 70, h: 42, label: "REST API", sub: "OAuth 2.0" },
+      { id: "dash", kind: "box", x: 328, y: 68, w: 62, h: 42, label: "Analysts", sub: "dashboards" },
+    ],
+    edges: [["tx", "risk", "<200 ms"], ["cases", "llm"], ["risk", "api"], ["llm", "api"], ["api", "dash"]],
+  },
+  pharmapro: {
+    title: "SYS-03 · MEDICAL DATA ETL",
+    nodes: [
+      { id: "pdf", kind: "doc", x: 10, y: 16, w: 68, h: 38, label: "PDFs", sub: "unstructured" },
+      { id: "web", kind: "box", x: 10, y: 78, w: 68, h: 40, label: "Web", sub: "scraped" },
+      { id: "rec", kind: "db", x: 10, y: 136, w: 68, h: 44, label: "Records", sub: "internal" },
+      { id: "etl", kind: "box", x: 124, y: 78, w: 86, h: 40, label: "Python ETL", sub: "2h → 10 min" },
+      { id: "clean", kind: "db", x: 240, y: 74, w: 68, h: 48, label: "Clean set", sub: "validated" },
+      { id: "ceo", kind: "box", x: 330, y: 78, w: 62, h: 40, label: "CEO", sub: "insights" },
+    ],
+    edges: [["pdf", "etl"], ["web", "etl"], ["rec", "etl"], ["etl", "clean"], ["clean", "ceo"]],
+  },
+};
+
+function shapePath(n) {
+  const { x, y, w, h } = n;
+  if (n.kind === "db") {
+    const ry = 6;
+    return `M${x} ${y + ry} A${w / 2} ${ry} 0 0 1 ${x + w} ${y + ry} A${w / 2} ${ry} 0 0 1 ${x} ${y + ry} V${y + h - ry} A${w / 2} ${ry} 0 0 0 ${x + w} ${y + h - ry} V${y + ry}`;
+  }
+  if (n.kind === "doc") {
+    const f = 9;
+    return `M${x} ${y} H${x + w - f} L${x + w} ${y + f} V${y + h} H${x} Z M${x + w - f} ${y} V${y + f} H${x + w}`;
+  }
+  return `M${x + 3} ${y} H${x + w - 3} Q${x + w} ${y} ${x + w} ${y + 3} V${y + h - 3} Q${x + w} ${y + h} ${x + w - 3} ${y + h} H${x + 3} Q${x} ${y + h} ${x} ${y + h - 3} V${y + 3} Q${x} ${y} ${x + 3} ${y} Z`;
+}
+
+function edgePath(a, b) {
+  const sx = a.x + a.w, sy = a.y + a.h / 2;
+  const ex = b.x - 4, ey = b.y + b.h / 2;
+  const mx = Math.round((sx + ex) / 2);
+  return { d: sy === ey ? `M${sx} ${sy} H${ex}` : `M${sx} ${sy} H${mx} V${ey} H${ex}`, ex, ey, mx, sy };
+}
+
+export function SystemBlueprint({ system, play }) {
+  const spec = SYSTEMS[system];
+  const s = useCounter();
+  if (!spec) return null;
+  const byId = Object.fromEntries(spec.nodes.map((n) => [n.id, n]));
+  const edges = spec.edges.map(([a, b, label]) => ({ ...edgePath(byId[a], byId[b]), label }));
+  return (
+    <svg className={`bp-svg sys ${play ? "draw" : ""}`} viewBox="0 0 400 222" role="img" aria-label={`Architecture sketch: ${spec.title}`}>
+      {spec.zone && (
+        <>
+          <rect className="ln cons" x={spec.zone.x} y={spec.zone.y} width={spec.zone.w} height={spec.zone.h} rx="6" />
+          <text className="lbl dimtxt" x={spec.zone.x + spec.zone.w / 2} y={spec.zone.band ? spec.zone.y + 13 : spec.zone.y + spec.zone.h + 11} textAnchor="middle" style={s()}>
+            {spec.zone.label}
+          </text>
+        </>
+      )}
+      {spec.nodes.map((n) => (
+        <g key={n.id}>
+          <path className="ln" pathLength="1" d={shapePath(n)} style={s()} />
+          <text className="lbl node-l" x={n.x + n.w / 2} y={n.y + n.h / 2 + (n.kind === "db" ? 2 : -1)} textAnchor="middle" style={s()}>
+            {n.label}
+          </text>
+          <text className="lbl node-s" x={n.x + n.w / 2} y={n.y + n.h / 2 + (n.kind === "db" ? 14 : 12)} textAnchor="middle" style={s()}>
+            {n.sub}
+          </text>
+        </g>
+      ))}
+      {edges.map((e, i) => (
+        <g key={i}>
+          <path className="ln dim" pathLength="1" d={`${e.d} M${e.ex - 5} ${e.ey - 3} L${e.ex} ${e.ey} L${e.ex - 5} ${e.ey + 3}`} style={s()} />
+          {e.label && (
+            <text className="lbl dimtxt" x={e.mx} y={e.sy - 5} textAnchor="middle" style={s()}>
+              {e.label}
+            </text>
+          )}
+        </g>
+      ))}
+      {play && (
+        <g className="packets">
+          {edges.map((e, i) => (
+            <circle key={i} r="2.4" className="pk">
+              <animateMotion dur={`${1.6 + (i % 3) * 0.4}s`} begin={`${(i * 0.37) % 1.5}s`} repeatCount="indefinite" path={e.d} />
+            </circle>
+          ))}
+        </g>
+      )}
+      <text className="lbl" x="200" y="214" textAnchor="middle" style={s()}>
+        {spec.title}
+      </text>
+    </svg>
+  );
+}

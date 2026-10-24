@@ -85,6 +85,8 @@ export const metrics = [
 export const experience = [
   {
     company: "Centene Corporation",
+    system: "centene", // architecture blueprint in Blueprint.jsx
+    stamp: "+28%",
     role: "Software Engineer, AI",
     location: "Boston, MA",
     start: "Jun 2025",
@@ -102,6 +104,8 @@ export const experience = [
   },
   {
     company: "Capgemini",
+    system: "capgemini", // architecture blueprint in Blueprint.jsx
+    stamp: "10K/min",
     role: "AI Software Engineer",
     location: "Pune, India",
     start: "Jan 2023",
@@ -120,6 +124,8 @@ export const experience = [
   },
   {
     company: "PharmaPro",
+    system: "pharmapro", // architecture blueprint in Blueprint.jsx
+    stamp: "−92%",
     role: "Data Science Intern",
     location: "Mumbai, India",
     start: "Feb 2022",
