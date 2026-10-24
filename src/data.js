@@ -203,6 +203,7 @@ export const education = [
     location: "Boston, MA",
     start: "Sep 2023",
     end: "May 2025",
+    sheet: "modern", // blueprint drawing: "modern" or "tower"
     notes: [],
   },
   {
@@ -211,6 +212,7 @@ export const education = [
     location: "Pune, India",
     start: "Aug 2019",
     end: "May 2023",
+    sheet: "tower",
     notes: [],
   },
 ];

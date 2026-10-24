@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
+import Blueprint from "./Blueprint.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
    A playful nod to the RAG work: visitors type a question and the
@@ -495,29 +496,59 @@ function Skills({ active, setActive }) {
   );
 }
 
+function EduSheet({ ed, i, total }) {
+  const [ref, inView] = useInView();
+  const degreeShort = ed.degree.replace("Master of Science", "M.S.").replace("Bachelor of Science", "B.S.");
+  return (
+    <article ref={ref} className={`bp-card ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"}>
+      <div className="bp-sheet" onPointerMove={spot}>
+        <span className="bp-cross" aria-hidden="true" />
+        <span className="bp-stamp mono" aria-hidden="true">{ed.end.slice(-4)}</span>
+        <Blueprint kind={ed.sheet} play={inView} />
+      </div>
+      <dl className="bp-block mono">
+        <div className="bp-cell wide">
+          <dt>Institution</dt>
+          <dd><h3>{ed.school}</h3></dd>
+        </div>
+        <div className="bp-cell wide">
+          <dt>Degree</dt>
+          <dd>{ed.degree}</dd>
+        </div>
+        <div className="bp-cell">
+          <dt>Location</dt>
+          <dd>{ed.location}</dd>
+        </div>
+        <div className="bp-cell">
+          <dt>Dates</dt>
+          <dd>{ed.start ? `${ed.start} – ` : ""}{ed.end}</dd>
+        </div>
+        <div className="bp-cell">
+          <dt>Drawn by</dt>
+          <dd>V. Patil · {degreeShort.split(",")[0]}</dd>
+        </div>
+        <div className="bp-cell">
+          <dt>Sheet</dt>
+          <dd>{String(i + 1).padStart(2, "0")} of {String(total).padStart(2, "0")}</dd>
+        </div>
+        {ed.notes?.length > 0 && (
+          <div className="bp-cell wide">
+            <dt>Notes</dt>
+            <dd>{ed.notes.join(" · ")}</dd>
+          </div>
+        )}
+      </dl>
+    </article>
+  );
+}
+
 function Education() {
   return (
     <section className="wrap section">
-      <SectionTitle id="education" kicker="Education" title="Where I trained" />
-      <div className="edu-list">
-        {education.map((ed) => (
-          <div className="edu" key={ed.school + ed.degree} data-reveal="left">
-            <div className="edu-cap mono" aria-hidden="true">{ed.end.slice(-2)}’</div>
-            <div>
-              <h3>{ed.school}</h3>
-              <p>{ed.degree}</p>
-              <p className="mono small muted">
-                {ed.location} · {ed.start ? `${ed.start} – ` : ""}{ed.end}
-              </p>
-              {ed.notes?.length > 0 && (
-                <ul>
-                  {ed.notes.map((n) => (
-                    <li key={n}>{n}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+      <SectionTitle id="education" kicker="Education" title="Where I trained" note="Drawn to scale, more or less." />
+      <div className="bp-list">
+        {education.map((ed, i) => (
+          <EduSheet key={ed.school + ed.degree} ed={ed} i={i} total={education.length} />
         ))}
       </div>
     </section>
