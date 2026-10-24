@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
+import ContactForm from "./ContactForm.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
   RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
@@ -646,6 +647,7 @@ function Contact() {
     <section className="contact" id="contact">
       <Marquee items={["Let’s build something", "Backend", "Automation", "AI"]} speed={28} className="mq-giant" />
       <div className="wrap contact-inner">
+        <div className="contact-copy">
         <p className="status mono" data-reveal><span className="pulse" aria-hidden="true" /> Open to Software, Automation &amp; AI Engineer roles</p>
         <p className="mono small kicker" data-reveal>Contact</p>
         <h2 data-reveal>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
@@ -659,6 +661,10 @@ function Contact() {
               {l.label} ↗
             </a>
           ))}
+        </div>
+        </div>
+        <div className="contact-form" data-reveal="right">
+          <ContactForm to={profile.email} handle="vipul.patil" />
         </div>
       </div>
     </section>
