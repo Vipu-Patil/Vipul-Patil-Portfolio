@@ -1035,3 +1035,92 @@ body.has-ring .cursor-ring, body.has-ring .cursor-dot { opacity: 1; }
 .showcase-demo.trace { display: flex; flex-direction: column; }
 .showcase-demo.trace .trace-lines { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 .showcase-demo.trace .trace-lines li { flex: none; }
+
+/* ═══ Creative contact console ═══ */
+.contact-inner { grid-template-columns: minmax(0, 1fr) !important; gap: 34px; }
+@media (min-width: 960px) {
+  .contact-copy { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "status ." "kicker email" "title cta"; column-gap: 48px; align-items: end; }
+  .contact-copy > .status { grid-area: status; }
+  .contact-copy > .kicker { grid-area: kicker; }
+  .contact-copy > h2 { grid-area: title; }
+  .contact-copy > .email-row { grid-area: email; justify-self: end; }
+  .contact-copy > .cta-row { grid-area: cta; justify-self: end; }
+  .contact .contact-copy h2 { max-width: 20ch; }
+}
+.cf-shell {
+  --cf-bg: #14161b; --cf-field: #0e0f13; --cf-line: #2a2d35; --cf-ink: #e9ebf1; --cf-muted: #8b909c; --cf-gold: #e3b866;
+  position: relative; display: grid; gap: 0; border-radius: 22px; padding: 1.5px; isolation: isolate;
+  background: var(--cf-line);
+}
+.cf-shell::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; opacity: 0; transition: opacity .4s;
+  background: conic-gradient(from var(--angle), transparent 0 55%, var(--cf-gold) 70%, #fff6dc 76%, var(--cf-gold) 82%, transparent 92%);
+  animation: spin 3.2s linear infinite;
+}
+.cf-shell:focus-within::before, .cf-shell.busy::before { opacity: 1; }
+.cf-shell.busy::before { animation-duration: 1s; }
+@media (min-width: 900px) { .cf-shell { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); } }
+.cf-shell .cf-card { border: 0; border-radius: 20px; box-shadow: none; position: relative; overflow: hidden; }
+@media (min-width: 900px) { .cf-shell .cf-card { border-radius: 20px 0 0 20px; } .cf-shell .cf-done { border-radius: 20px; grid-column: 1 / -1; } }
+.cf-shell { box-shadow: 0 30px 70px rgba(5, 8, 25, 0.5); }
+.cf-to { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.cf-online { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: #6ee7a8; font-weight: 400; font-size: .74rem; }
+.cf-online i { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px #34d399; animation: hint 1.8s ease-in-out infinite; }
+.cf-field > span { display: flex; justify-content: space-between; }
+.cf-bytes { font-weight: 400; color: var(--cf-muted); font-variant-numeric: tabular-nums; }
+
+/* signature line */
+.cf-sign { display: flex; align-items: baseline; gap: 14px; padding: 4px 2px 0; border-bottom: 1px dashed var(--cf-line); min-height: 54px; overflow: hidden; }
+.cf-sign > .mono { font-size: .78rem; color: var(--cf-muted); flex: none; }
+.cf-sig { font: 700 2rem / 1.3 "Caveat", "Segoe Script", "Bradley Hand", cursive; color: #5f6470; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cf-sig.on { color: var(--cf-gold); text-shadow: 0 0 18px rgba(227, 184, 102, 0.35); animation: sig-in .6s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes sig-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* request preview */
+.cf-preview {
+  position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(227, 184, 102, 0.08), transparent 60%), #0b0c10;
+  border-radius: 0 0 20px 20px; color: #c9ccd6; font-size: .8rem;
+}
+@media (min-width: 900px) { .cf-preview { border-radius: 0 20px 20px 0; border-left: 1px solid var(--cf-line); } }
+@media (max-width: 899px) { .cf-shell .cf-card { border-radius: 20px 20px 0 0; } .cf-preview { border-top: 1px solid var(--cf-line); } }
+.cf-pv-bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--cf-line); color: var(--cf-muted); font-size: .72rem; }
+.cf-pv-bar i { width: 9px; height: 9px; border-radius: 50%; background: #ff6b6b; }
+.cf-pv-bar i:nth-child(2) { background: #ffd166; }
+.cf-pv-bar i:nth-child(3) { background: #4ade80; }
+.cf-pv-bar span { margin-left: 8px; }
+.cf-code { margin: 0; padding: 18px 18px 8px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; font: inherit; flex: 1; }
+.j-verb { color: #4ade80; font-weight: 600; }
+.j-url { color: var(--cf-gold); }
+.j-key { color: #93c5fd; }
+.j-str { color: #fde68a; }
+.j-ph { color: #4b5060; font-style: italic; }
+.j-num { color: #f9a8d4; font-variant-numeric: tabular-nums; }
+.j-bool { color: #c4b5fd; }
+.cf-caret { display: inline-block; width: 7px; height: 1em; margin-left: 4px; vertical-align: -2px; background: var(--cf-gold); animation: blink 1s steps(1) infinite; }
+.cf-log { list-style: none; margin: 0; padding: 12px 18px 18px; border-top: 1px dashed var(--cf-line); display: grid; gap: 4px; min-height: 92px; align-content: start; }
+.cf-log li { animation: line-in .3s ease both; }
+.cf-log .dim { color: #5f6470; }
+.cf-log .run { color: #93c5fd; }
+.cf-log .ok { color: #6ee7a8; }
+.cf-log .win { color: var(--cf-gold); font-weight: 600; text-shadow: 0 0 14px rgba(227, 184, 102, 0.45); }
+.cf-log .bad { color: #fca5a5; }
+.cf-dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+/* paper plane + delivered stamp */
+.cf-plane { position: absolute; left: 50%; bottom: 40px; width: 52px; height: 52px; z-index: 5; pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4)); animation: fly 1.1s cubic-bezier(.5, 0, .7, 1) forwards; }
+@keyframes fly {
+  0% { transform: translate(-50%, 0) rotate(0deg) scale(.6); opacity: 0; }
+  15% { opacity: 1; transform: translate(-40%, -20px) rotate(-8deg) scale(1); }
+  100% { transform: translate(420px, -460px) rotate(-18deg) scale(.4); opacity: 0; }
+}
+.cf-done { position: relative; min-height: 360px; align-content: center; }
+.cf-stamp {
+  position: absolute; right: 28px; top: 28px; padding: 6px 14px; border: 3px double var(--cf-gold); color: var(--cf-gold); border-radius: 6px;
+  font-weight: 600; letter-spacing: .2em; font-size: .9rem; transform: rotate(-10deg); opacity: .9;
+  animation: stamp-in .45s cubic-bezier(.3, 1.6, .5, 1) .2s both;
+}
+@keyframes stamp-in { from { transform: rotate(-10deg) scale(2.2); opacity: 0; } }
+.cf-done .cf-sig-done { font: 700 2.2rem/1.2 "Caveat", "Segoe Script", cursive; color: var(--cf-gold); animation: sig-in .8s ease .3s both; }
+@media (prefers-reduced-motion: reduce) { .cf-shell::before, .cf-plane { animation: none !important; } }
