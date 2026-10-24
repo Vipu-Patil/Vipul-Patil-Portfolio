@@ -21,6 +21,7 @@ export default function ContactForm({ to, handle }) {
   const [state, setState] = useState("idle"); // idle | sending | sent | failed
   const [step, setStep] = useState(-1);
   const [plane, setPlane] = useState(false);
+  const [reason, setReason] = useState("");
   const timer = useRef(null);
   useEffect(() => () => clearInterval(timer.current), []);
 
@@ -66,9 +67,13 @@ export default function ContactForm({ to, handle }) {
         _captcha: "false",
       }),
     })
-      .then(async (res) => res.ok && String((await res.json().catch(() => ({}))).success) === "true")
-      .catch(() => false);
-    const [ok] = await Promise.all([send, sleep(1700)]);
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok && String(data.success) === "true", msg: data.message || (res.ok ? "" : `HTTP ${res.status}`) };
+      })
+      .catch(() => ({ ok: false, msg: "network error: the form service couldn’t be reached" }));
+    const [{ ok, msg }] = await Promise.all([send, sleep(1700)]);
+    setReason(msg || "");
     clearInterval(timer.current);
     setStep(STEPS.length);
     if (ok) {
@@ -135,7 +140,12 @@ export default function ContactForm({ to, handle }) {
         <button className="cf-send mono" type="submit" disabled={state === "sending"}>
           {state === "sending" ? "Sending…" : "Sign & send"} <span aria-hidden="true">↗</span>
         </button>
-        {state === "failed" && (
+        {state === "failed" && /activat/i.test(reason) && (
+          <p className="cf-fail" role="alert">
+            This form is still being set up, so the message wasn’t delivered. <a href={mailto()}>Send it from your email app</a> instead, or write to <span className="mono">{to}</span>.
+          </p>
+        )}
+        {state === "failed" && !/activat/i.test(reason) && (
           <p className="cf-fail" role="alert">
             The message didn’t go through. <a href={mailto()}>Open it in your email app</a> instead, or write to <span className="mono">{to}</span>.
           </p>
@@ -178,7 +188,7 @@ export default function ContactForm({ to, handle }) {
           )}
           {state === "sending" && step >= STEPS.length && !plane && <li className="run">› awaiting response<span className="cf-dots" /></li>}
           {plane && <li className="win">✓ 200 OK · delivered</li>}
-          {state === "failed" && <li className="bad">✕ couldn’t deliver · use your email app</li>}
+          {state === "failed" && <li className="bad">✕ couldn’t deliver{reason ? ` · ${reason}` : ""}</li>}
         </ol>
       </aside>
     </div>
