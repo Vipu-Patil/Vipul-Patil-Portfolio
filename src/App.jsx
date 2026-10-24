@@ -3,6 +3,10 @@ import { profile, pillars, metrics, experience, projects, skills, education } fr
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
+import {
+  RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
+  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced,
+} from "./Showpieces.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
    A playful nod to the RAG work: visitors type a question and the
@@ -167,7 +171,9 @@ function Hero() {
         <h1 data-reveal>
           Hi, I’m <span className="hl">{profile.firstName}</span>.
           <br />
-          {profile.headline}
+          I build <RotatingWord words={profile.rotating} />
+          <br />
+          that run in production.
         </h1>
         <ul className="roles" aria-label="Roles" data-reveal>
           {profile.roles.map((r) => (
@@ -209,18 +215,49 @@ function Hero() {
   );
 }
 
+const DEMOS = [ApiLog, PipelineRun, RagStream];
+
 function WhatIDo() {
+  const [k, setK] = useState(0);
+  const [auto, setAuto] = useState(true);
+  const [ref, on] = useOnScreen(0.2);
+  useEffect(() => {
+    if (!auto || !on || prefersReduced()) return;
+    const t = setTimeout(() => setK((v) => (v + 1) % pillars.length), 8000);
+    return () => clearTimeout(t);
+  }, [k, auto, on]);
+  const p = pillars[k];
+  const Demo = DEMOS[k] || ApiLog;
   return (
-    <section className="wrap section pillars-section">
-      <SectionTitle id="what" kicker="What I do" title="One engineer, three hats" note="Each claim below comes from a system I shipped." />
-      <div className="pillars">
-        {pillars.map((p) => (
-          <article className="pillar" key={p.role} data-reveal="pop">
+    <section ref={ref} className="wrap section pillars-section">
+      <SectionTitle id="what" kicker="What I do" title="One engineer, three hats" note="Pick a role to see it running. Every claim comes from a system I shipped." big="ROLES" />
+      <div className="console" data-reveal="pop">
+        <div className="console-tabs" role="tablist" aria-label="Roles">
+          {pillars.map((x, i) => (
+            <button
+              key={x.role}
+              role="tab"
+              id={`role-tab-${i}`}
+              aria-selected={i === k}
+              aria-controls="role-panel"
+              className={`ctab c${i} ${i === k ? "on" : ""}`}
+              onClick={() => {
+                setK(i);
+                setAuto(false);
+              }}
+            >
+              <span className="ctab-role">{x.role}</span>
+              <span className="ctab-line">{x.line}</span>
+              {i === k && auto && on && <span className="ctab-timer" key={`t${k}`} />}
+            </button>
+          ))}
+        </div>
+        <div className={`console-panel c${k}`} role="tabpanel" id="role-panel" aria-labelledby={`role-tab-${k}`} key={k}>
+          <div className="console-proof">
             <h3>{p.role}</h3>
-            <p className="pillar-line">{p.line}</p>
             <ul>
-              {p.proof.map((t) => (
-                <li key={t}>{t}</li>
+              {p.proof.map((t, j) => (
+                <li key={t} style={{ "--j": j }}>{t}</li>
               ))}
             </ul>
             <div className="tags">
@@ -228,9 +265,21 @@ function WhatIDo() {
                 <span key={t} className="tag">{t}</span>
               ))}
             </div>
-          </article>
-        ))}
+          </div>
+          <Demo running={on} />
+        </div>
       </div>
+    </section>
+  );
+}
+
+function Ticker() {
+  const a = [...skills[0].items, ...skills[2].items, ...skills[1].items];
+  const b = [...skills[3].items, ...skills[4].items, ...skills[5].items];
+  return (
+    <section className="ticker" aria-label="Tech stack">
+      <Marquee items={a} speed={55} />
+      <Marquee items={b} speed={60} reverse className="alt" />
     </section>
   );
 }
@@ -241,7 +290,7 @@ function Metrics() {
       <div className="wrap metrics-row">
         {metrics.map((m) => (
           <div className="metric" key={m.label} data-reveal="pop">
-            <div className="metric-val">{m.value}</div>
+            <div className="metric-val"><CountUp value={m.value} /></div>
             <div className="metric-label">{m.label}</div>
             <div className="mono small muted">{m.where}</div>
           </div>
@@ -251,9 +300,10 @@ function Metrics() {
   );
 }
 
-function SectionTitle({ id, kicker, title, note }) {
+function SectionTitle({ id, kicker, title, note, big }) {
   return (
     <div className="section-title" id={id} data-reveal="left">
+      {big && <span className="bigword" aria-hidden="true">{big}</span>}
       <p className="mono small kicker">{kicker}</p>
       <h2>{title}</h2>
       {note && <p className="muted">{note}</p>}
@@ -384,7 +434,7 @@ function Experience({ active }) {
   const [open, setOpen] = useState(0);
   return (
     <section className="wrap section">
-      <SectionTitle id="work" kicker="Experience" title="Where I’ve shipped" note="Tap a role to expand it." />
+      <SectionTitle id="work" kicker="Experience" title="Where I’ve shipped" note="Tap a role to expand it." big="SHIPPED" />
       <ol className="timeline">
         <span className="beam" aria-hidden="true" />
         {experience.map((e, i) => (
@@ -414,7 +464,7 @@ function ProjectCard({ p, i, active }) {
   return (
     <article
       ref={ref}
-      className={`project holo reveal ${inView ? "in" : ""} ${lit(p.tags, active)}`}
+      className={`project holo reveal ${p.demo ? "feature" : ""} ${p.demo && i % 2 ? "flip" : ""} ${inView ? "in" : ""} ${lit(p.tags, active)}`}
       style={{ "--i": i % 2 }}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
@@ -425,6 +475,8 @@ function ProjectCard({ p, i, active }) {
         <span className="term-path">~/projects/{slug}</span>
         <span className="term-date">{p.date}</span>
       </div>
+      <div className="project-copy">
+      {p.demo && <span className="feature-badge mono">Featured build</span>}
       <h3><Scramble text={p.name} play={inView} /></h3>
       <p className="project-kicker">{p.kicker}</p>
       <ul>
@@ -444,6 +496,9 @@ function ProjectCard({ p, i, active }) {
           </a>
         )}
       </div>
+      </div>
+      {p.demo === "trace" && <AgentTrace />}
+      {p.demo === "browser" && <BrowserDemo />}
     </article>
   );
 }
@@ -451,7 +506,7 @@ function ProjectCard({ p, i, active }) {
 function Projects({ active }) {
   return (
     <section className="wrap section">
-      <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" />
+      <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" note="The two featured builds run a live, illustrative demo." big="BUILT" />
       <div className="projects">
         {projects.map((p, i) => (
           <ProjectCard key={p.name} p={p} i={i} active={active} />
@@ -471,10 +526,11 @@ function Skills({ active, setActive }) {
   }, [active]);
   return (
     <section className="wrap section">
-      <SectionTitle id="skills" kicker="Skills" title="The toolbox" note="Tap a skill to light up where I’ve used it on this page." />
-      <div className="skill-groups">
-        {skills.map((g) => (
-          <div className="skill-group" key={g.group} data-reveal>
+      <SectionTitle id="skills" kicker="Skills" title="The toolbox" note="Tap a skill to light up where I’ve used it on this page." big="STACK" />
+      <div className="skill-groups bento">
+        {skills.map((g, gi) => (
+          <div className={`skill-group tile t${gi}`} key={g.group} data-reveal="pop">
+            <span className="tile-count" aria-hidden="true">{String(g.items.length).padStart(2, "0")}</span>
             <h3 className="mono small">{g.group}</h3>
             <div className="chips">
               {g.items.map((s) => (
@@ -554,7 +610,7 @@ function EduSheet({ ed, i, total }) {
 function Education() {
   return (
     <section className="wrap section">
-      <SectionTitle id="education" kicker="Education" title="Where I trained" note="Drawn to scale, more or less." />
+      <SectionTitle id="education" kicker="Education" title="Where I trained" note="Drawn to scale, more or less." big="TRAINED" />
       <div className="bp-list">
         {education.map((ed, i) => (
           <EduSheet key={ed.school + ed.degree} ed={ed} i={i} total={education.length} />
@@ -588,7 +644,9 @@ function Contact() {
   };
   return (
     <section className="contact" id="contact">
+      <Marquee items={["Let’s build something", "Backend", "Automation", "AI"]} speed={28} className="mq-giant" />
       <div className="wrap contact-inner">
+        <p className="status mono" data-reveal><span className="pulse" aria-hidden="true" /> Open to Software, Automation &amp; AI Engineer roles</p>
         <p className="mono small kicker" data-reveal>Contact</p>
         <h2 data-reveal>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
         <div className="email-row" data-reveal>
@@ -639,8 +697,11 @@ function useScrollReveal() {
 export default function App() {
   const [active, setActive] = useState("");
   useScrollReveal();
+  useMagnetic();
   return (
     <>
+      <ScrollProgress />
+      <CursorRing />
       <div className="bg-layer" aria-hidden="true">
         <span className="blob b1" />
         <span className="blob b2" />
@@ -651,6 +712,7 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <Ticker />
         <WhatIDo />
         <div className="wrap">
           <AskMyResume />
@@ -668,7 +730,7 @@ export default function App() {
       </main>
       <footer className="wrap footer mono small muted" data-reveal>
         <span>© {new Date().getFullYear()} {profile.name}</span>
-        <span>Built with React</span>
+        <span>Built with React, canvas and a few too many animations</span>
       </footer>
     </>
   );

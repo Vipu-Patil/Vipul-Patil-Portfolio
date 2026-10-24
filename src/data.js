@@ -13,6 +13,8 @@ export const profile = {
   location: "Boston, MA",
   currently: "Software Engineer, AI at Centene",
   headline: "I build backends, automation and AI that run in production.",
+  // Words that rotate in the hero headline: "I build ___ that run in production."
+  rotating: ["backends", "AI agents", "data pipelines", "RAG systems", "real-time APIs", "automations"],
   summary:
     "Software engineer building high-throughput backend services, automation and AI systems for healthcare and financial services. I write Python, C++ and TypeScript, ship APIs and data pipelines with tests and CI/CD, and add LLMs, RAG, agents and ML where they change the outcome. I embed with the teams who use what I build and measure success in their numbers: 40% smaller review queues, half the documentation time, 99.7% uptime.",
   email: "patil.vipu.2001@gmail.com",
@@ -146,6 +148,7 @@ export const projects = [
     kicker: "Autonomous incident investigation agent with an evaluation suite",
     date: "Sep 2026",
     url: "https://github.com/Vipu-Patil/IncidentIQ",
+    demo: "trace", // featured with a live agent-trace demo
     stack: ["Python", "LangGraph", "LangSmith", "FastAPI", "PostgreSQL/pgvector", "Ollama", "Docker", "AWS"],
     bullets: [
       "A LangGraph agent that investigates production incidents: it retrieves runbooks with RAG over pgvector and calls tools for logs, metrics and deployment data to write evidence-backed root-cause reports.",
@@ -159,6 +162,7 @@ export const projects = [
     kicker: "Browser automation agent for legacy banking apps with no APIs",
     date: "Aug 2026",
     url: "https://github.com/Vipu-Patil/AI-Banking-Computer-Use-Agent",
+    demo: "browser", // featured with a live browser-automation demo
     stack: ["Python", "TypeScript", "FastAPI", "Gemini API", "Playwright", "LangChain", "PostgreSQL", "React"],
     bullets: [
       "Automates multi-step banking workflows end to end in legacy, frameset-based web apps, grounding every action in verified page elements instead of hallucinated selectors.",
