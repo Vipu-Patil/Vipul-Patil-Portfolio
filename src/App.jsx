@@ -3,10 +3,12 @@ import { profile, pillars, metrics, experience, projects, skills, education } fr
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
 import ContactForm from "./ContactForm.jsx";
+const Core3D = React.lazy(() => import("./Core3D.jsx"));
+import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
   RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
-  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced,
+  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D,
 } from "./Showpieces.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
@@ -165,6 +167,9 @@ function Nav() {
 function Hero() {
   return (
     <section className="hero wrap" id="top">
+      <React.Suspense fallback={null}>
+        <Core3D className="hero-core" />
+      </React.Suspense>
       <div className="hero-copy">
         <p className="eyebrow mono" data-reveal>
           <span className="pulse" aria-hidden="true" /> {profile.currently} · {profile.location}
@@ -195,10 +200,10 @@ function Hero() {
           <span className="hint-dot" /> move your cursor around · click anywhere
         </p>
       </div>
-      <figure className="portrait" data-reveal="zoom">
+      <figure className="portrait tilt-glare" data-reveal="zoom" data-tilt="14">
         <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
       </figure>
-      <aside className="model-card" aria-label="Model card" data-reveal="right">
+      <aside className="model-card tilt-glare" aria-label="Model card" data-reveal="right" data-tilt="8">
         <div className="mc-head mono">
           <span>MODEL CARD</span>
           <span className="mc-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -528,22 +533,20 @@ function Skills({ active, setActive }) {
   return (
     <section className="wrap section">
       <SectionTitle id="skills" kicker="Skills" title="The toolbox" note="Tap a skill to light up where I’ve used it on this page." big="STACK" />
-      <div className="skill-groups bento">
-        {skills.map((g, gi) => (
-          <div className={`skill-group tile t${gi}`} key={g.group} data-reveal="pop">
-            <span className="tile-count" aria-hidden="true">{String(g.items.length).padStart(2, "0")}</span>
-            <h3 className="mono small">{g.group}</h3>
-            <div className="chips">
-              {g.items.map((s) => (
-                <button key={s} className={`chip skill ${active === s ? "on" : ""}`} onClick={() => setActive(active === s ? "" : s)} aria-pressed={active === s}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className={`used-in ${active ? "show" : ""}`} aria-live="polite" data-reveal>
+      <div className="skills-stage">
+        <div className="globe-wrap" data-reveal="zoom">
+          <SkillGlobe groups={skills} active={active} onPick={setActive} />
+        </div>
+        <div className="globe-side" data-reveal="right">
+          <p className="mono small kicker">Interactive</p>
+          <h3>Spin the stack</h3>
+          <p className="muted">Drag the globe to turn it. Pick any skill to light up the jobs and projects where I used it.</p>
+          <ul className="globe-legend mono small">
+            {skills.map((g, gi) => (
+              <li key={g.group}><i className={`g${gi}`} />{g.group}</li>
+            ))}
+          </ul>
+          <div className={`used-in ${active ? "show" : ""}`} aria-live="polite" data-reveal>
         {active ? (
           <>
             <strong>{active}</strong>
@@ -557,6 +560,23 @@ function Skills({ active, setActive }) {
         ) : (
           <span className="muted">No skill selected.</span>
         )}
+          </div>
+        </div>
+      </div>
+      <div className="skill-groups bento">
+        {skills.map((g, gi) => (
+          <div className={`skill-group tile tilt-glare t${gi}`} key={g.group} data-reveal="pop" data-tilt="6">
+            <span className="tile-count" aria-hidden="true">{String(g.items.length).padStart(2, "0")}</span>
+            <h3 className="mono small">{g.group}</h3>
+            <div className="chips">
+              {g.items.map((s) => (
+                <button key={s} className={`chip skill ${active === s ? "on" : ""}`} onClick={() => setActive(active === s ? "" : s)} aria-pressed={active === s}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -566,7 +586,7 @@ function EduSheet({ ed, i, total }) {
   const [ref, inView] = useInView();
   const degreeShort = ed.degree.replace("Master of Science", "M.S.").replace("Bachelor of Science", "B.S.");
   return (
-    <article ref={ref} className={`bp-card ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"}>
+    <article ref={ref} className={`bp-card tilt-glare ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"} data-tilt="7">
       <div className="bp-sheet" onPointerMove={spot}>
         <span className="bp-cross" aria-hidden="true" />
         <span className="bp-stamp mono" aria-hidden="true">{ed.end.slice(-4)}</span>
@@ -704,6 +724,7 @@ export default function App() {
   const [active, setActive] = useState("");
   useScrollReveal();
   useMagnetic();
+  useTilt3D();
   return (
     <>
       <ScrollProgress />

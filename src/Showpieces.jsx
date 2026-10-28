@@ -394,3 +394,30 @@ export function BrowserDemo() {
     </div>
   );
 }
+
+/* 3D tilt toward the cursor, with a moving glare, for any [data-tilt] element */
+export function useTilt3D() {
+  useEffect(() => {
+    if (!matchMedia("(pointer: fine)").matches || prefersReduced()) return;
+    let cur = null;
+    const reset = (el) => {
+      el.style.transform = "";
+      el.classList.remove("tilting");
+    };
+    const move = (e) => {
+      const el = e.target.closest && e.target.closest("[data-tilt]");
+      if (cur && cur !== el) reset(cur);
+      cur = el;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      const max = parseFloat(el.dataset.tilt) || 8;
+      el.style.transform = `perspective(900px) rotateX(${((0.5 - py) * max).toFixed(2)}deg) rotateY(${((px - 0.5) * max).toFixed(2)}deg) translateZ(0)`;
+      el.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
+      el.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
+      el.classList.add("tilting");
+    };
+    addEventListener("pointermove", move, { passive: true });
+    return () => removeEventListener("pointermove", move);
+  }, []);
+}

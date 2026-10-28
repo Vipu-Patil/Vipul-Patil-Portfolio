@@ -1124,3 +1124,89 @@ body.has-ring .cursor-ring, body.has-ring .cursor-dot { opacity: 1; }
 @keyframes stamp-in { from { transform: rotate(-10deg) scale(2.2); opacity: 0; } }
 .cf-done .cf-sig-done { font: 700 2.2rem/1.2 "Caveat", "Segoe Script", cursive; color: var(--cf-gold); animation: sig-in .8s ease .3s both; }
 @media (prefers-reduced-motion: reduce) { .cf-shell::before, .cf-plane { animation: none !important; } }
+
+/* ═══════════ 3D ═══════════ */
+
+/* Hero WebGL core sits behind the photo + model card column */
+.hero { position: relative; isolation: isolate; }
+.hero-core { position: absolute; z-index: -1; pointer-events: none; }
+@media (min-width: 900px) { .hero-core { top: -40px; bottom: -40px; right: -18%; width: 58%; } }
+@media (max-width: 899px) { .hero-core { top: -10px; right: -30%; width: 120%; height: 460px; opacity: .8; } }
+.core3d canvas { display: block; }
+
+/* 3D tilt + glare */
+[data-tilt] { transform-style: preserve-3d; will-change: transform; }
+.tilt-glare { position: relative; }
+.tilt-glare::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 4; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.28), transparent 45%);
+  mix-blend-mode: soft-light;
+}
+.tilt-glare.tilting::after { opacity: 1; }
+.portrait.tilting, .model-card.tilting { transition: transform .12s ease-out; }
+.portrait img { transform: translateZ(30px); }
+.bp-card.tilting, .tile.tilting { transition: transform .12s ease-out, box-shadow .25s; }
+
+/* 3D flip-in on scroll */
+.bento, .bp-list, .console, .metrics-row, .lab .timeline, .lab .projects, .skills-stage { perspective: 1200px; }
+.js-anim [data-reveal] { transition-property: opacity, translate, scale, filter, rotate, transform, box-shadow, border-color, background; transition-duration: .8s, .9s, .9s, .8s, 1s, .35s, .25s, .25s, .25s; transition-delay: var(--rv-d, 0ms), var(--rv-d, 0ms), var(--rv-d, 0ms), var(--rv-d, 0ms), var(--rv-d, 0ms), 0s, 0s, 0s, 0s; transition-timing-function: cubic-bezier(.2, .8, .2, 1); }
+.js-anim [data-reveal="pop"]:not([data-shown]) { rotate: x 55deg; transform-origin: 50% 100%; }
+.js-anim [data-reveal="left"]:not([data-shown]) { rotate: y 28deg; }
+.js-anim [data-reveal="right"]:not([data-shown]) { rotate: y -28deg; }
+.js-anim [data-reveal="zoom"]:not([data-shown]) { rotate: x -20deg; }
+.lab .reveal { transition-property: opacity, translate, filter, rotate, transform, border-color, box-shadow; transition-duration: .7s, .8s, .7s, 1s, .2s, .3s, .3s; transition-delay: var(--d), var(--d), var(--d), var(--d), 0s, 0s, 0s; }
+.js-anim .lab .reveal:not(.in) { rotate: x 30deg; transform-origin: 50% 0%; }
+
+/* Skills globe */
+.skills-stage { display: grid; gap: 28px; align-items: center; margin-bottom: 34px; }
+@media (min-width: 900px) { .skills-stage { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 48px; } }
+.globe-wrap { display: grid; place-items: center; min-width: 0; }
+.globe {
+  position: relative; width: min(100%, 500px); aspect-ratio: 1; max-width: 100%; touch-action: none; cursor: grab; user-select: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%);
+}
+.globe.grabbing { cursor: grabbing; }
+.globe-core {
+  position: absolute; left: 50%; top: 50%; width: 22%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--field-hot) 35%, var(--accent) 75%);
+  box-shadow: 0 0 60px color-mix(in srgb, var(--field-hot) 60%, transparent), 0 0 120px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: core-pulse 3s ease-in-out infinite; opacity: .85;
+}
+@keyframes core-pulse { 50% { scale: 1.12; } }
+.globe-ring { position: absolute; inset: 8%; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent); pointer-events: none; }
+.globe-ring.r1 { transform: rotateX(72deg); animation: ring-spin 18s linear infinite; }
+.globe-ring.r2 { inset: 4%; transform: rotateY(72deg); border-style: solid; border-color: color-mix(in srgb, var(--field-hot) 30%, transparent); animation: ring-spin2 24s linear infinite; }
+@keyframes ring-spin { to { transform: rotateX(72deg) rotateZ(360deg); } }
+@keyframes ring-spin2 { to { transform: rotateY(72deg) rotateZ(-360deg); } }
+.globe-tag {
+  position: absolute; left: 50%; top: 50%; white-space: nowrap; cursor: pointer;
+  font: 600 .82rem var(--f-mono); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); transition: background .2s, color .2s, box-shadow .2s;
+}
+.globe-tag:hover { background: var(--ink); color: var(--bg); }
+.globe-tag.on { background: var(--highlight); color: var(--highlight-ink); border-color: var(--highlight); box-shadow: 0 0 22px color-mix(in srgb, var(--highlight) 70%, transparent); }
+.globe-tag.g0 { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
+.globe-tag.g1 { border-color: var(--field-mint); }
+.globe-tag.g2 { border-color: #d9b400; }
+.globe-tag.g3 { border-color: var(--accent); color: var(--accent); }
+.globe-tag.g4 { border-color: var(--field-alt); }
+.globe-tag.g5 { border-color: var(--field-hot); }
+.globe-tag.g3:hover { color: var(--bg); }
+.globe-side { display: grid; gap: 14px; min-width: 0; }
+.globe-side h3 { font-size: var(--step-2); font-weight: 800; }
+.globe-legend { list-style: none; margin: 4px 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; color: var(--muted); }
+.globe-legend li { display: flex; align-items: center; gap: 8px; }
+.globe-legend i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; flex: none; }
+.globe-legend .g0 { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
+.globe-legend .g1 { border-color: var(--field-mint); }
+.globe-legend .g2 { border-color: #d9b400; }
+.globe-legend .g3 { border-color: var(--accent); }
+.globe-legend .g4 { border-color: var(--field-alt); }
+.globe-legend .g5 { border-color: var(--field-hot); }
+.globe-side .used-in { margin-top: 6px; }
+@media (max-width: 520px) { .globe-tag { font-size: .7rem; padding: 3px 8px; } }
+@media (prefers-reduced-motion: reduce) {
+  .globe-core, .globe-ring { animation: none !important; }
+  .js-anim [data-reveal]:not([data-shown]), .js-anim .lab .reveal:not(.in) { rotate: none; }
+}
