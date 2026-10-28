@@ -8,7 +8,7 @@ import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
   RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
-  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D,
+  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D, Stack3D, Stage3D,
 } from "./Showpieces.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
@@ -402,7 +402,7 @@ function Job({ e, i, active, open, onToggle }) {
           <div className="job-bp bp-sheet" onPointerMove={spot}>
             <span className="bp-cross" aria-hidden="true" />
             {e.stamp && <span className="bp-stamp mono" aria-hidden="true">{e.stamp}</span>}
-            <SystemBlueprint system={e.system} play={inView} />
+            <Stack3D className="sys3d" render={() => <SystemBlueprint system={e.system} play={inView} />} />
           </div>
         )}
         <div className="job-main">
@@ -503,8 +503,11 @@ function ProjectCard({ p, i, active }) {
         )}
       </div>
       </div>
-      {p.demo === "trace" && <AgentTrace />}
-      {p.demo === "browser" && <BrowserDemo />}
+      {p.demo && (
+        <Stage3D flip={i % 2 === 1}>
+          {p.demo === "trace" ? <AgentTrace /> : <BrowserDemo />}
+        </Stage3D>
+      )}
     </article>
   );
 }
@@ -590,7 +593,7 @@ function EduSheet({ ed, i, total }) {
       <div className="bp-sheet" onPointerMove={spot}>
         <span className="bp-cross" aria-hidden="true" />
         <span className="bp-stamp mono" aria-hidden="true">{ed.end.slice(-4)}</span>
-        <Blueprint kind={ed.sheet} play={inView} />
+        <Stack3D render={() => <Blueprint kind={ed.sheet} play={inView} />} />
       </div>
       <dl className="bp-block mono">
         <div className="bp-cell wide">

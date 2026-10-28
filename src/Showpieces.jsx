@@ -421,3 +421,27 @@ export function useTilt3D() {
     return () => removeEventListener("pointermove", move);
   }, []);
 }
+
+/* Renders the same drawing as three stacked depth layers
+   (back: construction + dimensions, middle: drawing, front: labels). */
+export function Stack3D({ render, className = "" }) {
+  return (
+    <div className={`stack3d ${className}`}>
+      <div className="s3-layer l0" aria-hidden="true">{render(0)}</div>
+      <div className="s3-layer l1">{render(1)}</div>
+      <div className="s3-layer l2" aria-hidden="true">{render(2)}</div>
+    </div>
+  );
+}
+
+/* A floating 3D stage with holographic panes behind its content */
+export function Stage3D({ children, flip }) {
+  return (
+    <div className={`stage3d ${flip ? "flip" : ""}`}>
+      <span className="s3-pane p2" aria-hidden="true" />
+      <span className="s3-pane p1" aria-hidden="true" />
+      <div className="s3-front">{children}</div>
+      <span className="s3-floor" aria-hidden="true" />
+    </div>
+  );
+}

@@ -1210,3 +1210,76 @@ body.has-ring .cursor-ring, body.has-ring .cursor-dot { opacity: 1; }
   .globe-core, .globe-ring { animation: none !important; }
   .js-anim [data-reveal]:not([data-shown]), .js-anim .lab .reveal:not(.in) { rotate: none; }
 }
+
+/* ═══ 3D layered blueprints ═══ */
+.stack3d {
+  position: relative; transform-style: preserve-3d; --sep: 1;
+  transform: perspective(1000px) rotateX(7deg) rotateY(-9deg);
+  animation: s3-sway 7s ease-in-out infinite alternate;
+  transition: transform .5s cubic-bezier(.2, .8, .2, 1);
+}
+.sys3d { animation-duration: 8.5s; animation-delay: -2s; }
+@keyframes s3-sway {
+  0% { transform: perspective(1000px) rotateX(8deg) rotateY(-10deg); }
+  100% { transform: perspective(1000px) rotateX(3deg) rotateY(9deg); }
+}
+.s3-layer { transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2, .8, .2, 1), opacity .4s, filter .4s; }
+.s3-layer.l0, .s3-layer.l2 { position: absolute; inset: 0; pointer-events: none; }
+.s3-layer.l0 { transform: translateZ(calc(var(--sep) * -22px)); opacity: .75; }
+.s3-layer.l1 { position: relative; transform: translateZ(0); }
+.s3-layer.l2 { transform: translateZ(calc(var(--sep) * 30px)); }
+/* each layer shows only its part of the drawing */
+.s3-layer.l0 .ln:not(.cons):not(.dim), .s3-layer.l0 .lbl, .s3-layer.l0 .packets { visibility: hidden; }
+.s3-layer.l1 .cons, .s3-layer.l1 .dim, .s3-layer.l1 .lbl { visibility: hidden; }
+.s3-layer.l2 .ln, .s3-layer.l2 .packets { visibility: hidden; }
+.s3-layer.l2 .lbl { filter: drop-shadow(0 0 4px rgba(143, 227, 255, 0.7)); }
+.s3-layer.l0 .ln { filter: drop-shadow(0 0 2px rgba(143, 227, 255, 0.6)); }
+/* exploded view on hover */
+.bp-card:hover .stack3d, .job:hover .stack3d { --sep: 1.7; animation-play-state: paused; }
+.bp-card:hover .s3-layer.l1, .job:hover .s3-layer.l1 { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35)); }
+.bp-sheet { perspective: 1000px; }
+
+/* ═══ 3D stage for project demos ═══ */
+.stage3d {
+  position: relative; transform-style: preserve-3d; margin: 10px 6px 18px; --sep: 1;
+  transform: perspective(1100px) rotateX(7deg) rotateY(-11deg);
+  animation: stage-float 8s ease-in-out infinite alternate;
+  transition: transform .6s cubic-bezier(.2, .8, .2, 1);
+}
+.stage3d.flip { animation-name: stage-float-b; }
+@keyframes stage-float {
+  0% { transform: perspective(1100px) rotateX(8deg) rotateY(-12deg) translateY(0); }
+  100% { transform: perspective(1100px) rotateX(3deg) rotateY(-3deg) translateY(-6px); }
+}
+@keyframes stage-float-b {
+  0% { transform: perspective(1100px) rotateX(8deg) rotateY(12deg) translateY(0); }
+  100% { transform: perspective(1100px) rotateX(3deg) rotateY(3deg) translateY(-6px); }
+}
+.s3-front { position: relative; transform: translateZ(26px); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.s3-front .showcase-demo { margin: 0 !important; }
+.s3-pane {
+  position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+  border: 1px solid rgba(53, 224, 255, 0.45); background: linear-gradient(135deg, rgba(53, 224, 255, 0.08), rgba(167, 139, 250, 0.06));
+  box-shadow: 0 0 24px rgba(53, 224, 255, 0.15) inset; transition: transform .6s cubic-bezier(.2, .8, .2, 1), opacity .4s;
+}
+.s3-pane.p1 { transform: translateZ(calc(var(--sep) * -14px)) translate(calc(var(--sep) * 10px), calc(var(--sep) * 10px)); opacity: .8; }
+.s3-pane.p2 { transform: translateZ(calc(var(--sep) * -40px)) translate(calc(var(--sep) * 20px), calc(var(--sep) * 20px)); opacity: .45; border-color: rgba(167, 139, 250, 0.5); }
+.stage3d.flip .s3-pane.p1 { transform: translateZ(calc(var(--sep) * -14px)) translate(calc(var(--sep) * -10px), calc(var(--sep) * 10px)); }
+.stage3d.flip .s3-pane.p2 { transform: translateZ(calc(var(--sep) * -40px)) translate(calc(var(--sep) * -20px), calc(var(--sep) * 20px)); }
+.s3-floor {
+  position: absolute; left: 8%; right: 8%; bottom: -26px; height: 30px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(53, 224, 255, 0.35), transparent); filter: blur(8px);
+  transform: translateZ(-60px) rotateX(80deg); animation: floor-pulse 4s ease-in-out infinite;
+}
+@keyframes floor-pulse { 50% { opacity: .5; } }
+.project:hover .stage3d { --sep: 1.8; animation-play-state: paused; transform: perspective(1100px) rotateX(0deg) rotateY(0deg) translateY(-4px); }
+.project:hover .s3-front { transform: translateZ(46px); }
+
+@media (max-width: 759px) {
+  @keyframes s3-sway { 0% { transform: perspective(900px) rotateX(5deg) rotateY(-6deg); } 100% { transform: perspective(900px) rotateX(2deg) rotateY(6deg); } }
+  @keyframes stage-float { 0% { transform: perspective(900px) rotateX(5deg) rotateY(-7deg); } 100% { transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateY(-4px); } }
+  @keyframes stage-float-b { 0% { transform: perspective(900px) rotateX(5deg) rotateY(7deg); } 100% { transform: perspective(900px) rotateX(2deg) rotateY(2deg) translateY(-4px); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack3d, .stage3d, .s3-floor { animation: none !important; }
+}
