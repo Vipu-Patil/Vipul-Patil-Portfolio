@@ -45,10 +45,10 @@ export const pillars = [
     proof: [
       "Real-time risk scoring at 10K+ transactions/min, under 200 ms (Python, C++)",
       "REST APIs secured with OAuth 2.0 and role-based access control",
-      "Kafka + Spark streaming platform ingesting 100K+ events/hour",
+      "Postgres lease that turns a burst of requests into exactly one OpenAI call",
       "Testing standards with pytest at 85%+ coverage; led code reviews",
     ],
-    stack: ["Python", "C++", "FastAPI", "Kafka", "PostgreSQL"],
+    stack: ["Python", "C++", "FastAPI", "Next.js", "PostgreSQL"],
   },
   {
     role: "Automation",
@@ -144,6 +144,20 @@ export const experience = [
 // `url: null` hides the GitHub link on that card.
 export const projects = [
   {
+    name: "Movie Memory",
+    kicker: "Full-stack Next.js app with burst-safe LLM generation",
+    date: "Nov 2026",
+    url: "https://github.com/Vipu-Patil/Movie-Memory",
+    demo: "movie", // live cache + lease demo
+    stack: ["TypeScript", "Next.js", "React", "PostgreSQL", "Prisma", "NextAuth", "OpenAI API", "Vitest"],
+    bullets: [
+      "Sign in with Google, pick a favorite movie, and get an OpenAI-generated fun fact on a server-rendered dashboard (Next.js 16, React 19, Prisma, Postgres).",
+      "Backend correctness first: a 60-second per-user cache plus a Postgres lease (one atomic INSERT … ON CONFLICT) so a burst of refreshes makes exactly one OpenAI call, even across server instances.",
+      "Fails gracefully: 10 s OpenAI timeout, fallback to the last fact marked stale, user IDs only from the verified session, and Vitest unit + Postgres integration tests down to the exact 60 s boundary.",
+    ],
+    tags: ["TypeScript", "Next.js", "React", "PostgreSQL", "Prisma", "OAuth 2.0", "LLM Apps", "REST APIs", "Guardrails"],
+  },
+  {
     name: "IncidentIQ",
     kicker: "Autonomous incident investigation agent with an evaluation suite",
     date: "Sep 2026",
@@ -176,6 +190,7 @@ export const projects = [
     kicker: "Full-stack conversational search over medical literature",
     date: "Jan 2026",
     url: null,
+    demo: "rag", // live RAG request-log demo
     stack: ["FastAPI", "React", "PostgreSQL", "LangChain", "FAISS", "OpenAI API"],
     bullets: [
       "FastAPI backend, React front end and PostgreSQL datastore that let clinicians query medical literature through a conversational interface.",
@@ -183,23 +198,11 @@ export const projects = [
     ],
     tags: ["FastAPI", "React", "PostgreSQL", "RAG", "LangChain", "FAISS", "LLM Apps", "Offline Evals", "Python"],
   },
-  {
-    name: "Real-Time Fraud Event Processing",
-    kicker: "Event-driven streaming platform for transaction events",
-    date: "Nov 2025",
-    url: null,
-    stack: ["Kafka", "Python", "Spark Structured Streaming", "Prometheus"],
-    bullets: [
-      "Event-driven architecture with Kafka, Python consumers and Spark Structured Streaming that ingests, validates and enriches 100K+ simulated transaction events per hour.",
-      "Modular processing components with clear interfaces, structured logging, and Prometheus dashboards for throughput and error rates.",
-    ],
-    tags: ["Kafka", "Apache Spark", "Python", "Prometheus", "Microservices"],
-  },
 ];
 
 export const skills = [
-  { group: "Backend & APIs", items: ["Python", "Java", "C++", "TypeScript", "SQL", "FastAPI", "REST APIs", "OAuth 2.0", "Microservices", "pytest", "React"] },
-  { group: "Data & Infrastructure", items: ["PostgreSQL", "MongoDB", "Redis", "Kafka", "Apache Spark", "ETL Pipelines", "Pandas"] },
+  { group: "Backend & APIs", items: ["Python", "Java", "C++", "TypeScript", "SQL", "FastAPI", "Next.js", "REST APIs", "OAuth 2.0", "Microservices", "pytest", "React"] },
+  { group: "Data & Infrastructure", items: ["PostgreSQL", "Prisma", "MongoDB", "Redis", "Kafka", "Apache Spark", "ETL Pipelines", "Pandas"] },
   { group: "Automation & DevOps", items: ["CI/CD", "GitHub Actions", "Docker", "Kubernetes", "AWS", "Linux", "Playwright", "Automated Rollback", "MLflow", "Prometheus", "Git"] },
   { group: "AI & LLMs", items: ["LLM Apps", "RAG", "LangChain", "LangGraph", "Tool Calling", "Embeddings", "FAISS", "Pinecone", "pgvector", "Guardrails", "OpenAI · Anthropic · Gemini"] },
   { group: "Machine Learning", items: ["XGBoost", "Scikit-learn", "PyTorch", "Feature Engineering", "PR-AUC Evaluation", "Hugging Face"] },

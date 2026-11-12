@@ -316,22 +316,38 @@ const TRACE = [
   { t: "result", s: "● root cause: v2.8.1 connection-pool regression" },
   { t: "dim", s: "  confidence 0.87 · evidence: logs, metrics, deploys" },
 ];
-export function AgentTrace() {
+const MOVIE_TRACE = [
+  { t: "cmd", s: "$ GET /api/fact" },
+  { t: "step", s: "▸ cache miss · lease acquired" },
+  { t: "ok", s: "  ✓ OpenAI → new fact · stored" },
+  { t: "cmd", s: "$ GET /api/fact   (+12 s)" },
+  { t: "ok", s: "  ✓ cache hit · ~100 ms" },
+  { t: "cmd", s: "$ 3× GET /api/fact   (burst)" },
+  { t: "step", s: "▸ lease: 1 winner, 2 waiting" },
+  { t: "result", s: "● 1 OpenAI call · same fact for all 3" },
+  { t: "cmd", s: "$ GET /api/fact   (+61 s)" },
+  { t: "step", s: "▸ window expired · regenerate" },
+  { t: "guard", s: "▸ OpenAI timeout (10 s)" },
+  { t: "dim", s: "  → served last fact · marked stale" },
+];
+
+export function AgentTrace({ lines = TRACE, title = "agent trace · LangSmith", label = "Illustrative IncidentIQ investigation trace" }) {
   const [ref, on] = useOnScreen(0.3);
-  const [n, setN] = useState(prefersReduced() ? TRACE.length : 1);
+  const [n, setN] = useState(prefersReduced() ? lines.length : 1);
   useEffect(() => {
     if (!on || prefersReduced()) return;
-    const t = setInterval(() => setN((v) => (v >= TRACE.length + 6 ? 1 : v + 1)), 520);
+    const t = setInterval(() => setN((v) => (v >= lines.length + 6 ? 1 : v + 1)), 520);
     return () => clearInterval(t);
-  }, [on]);
+  }, [on, lines.length]);
+  const TRACE_ = lines;
   return (
-    <div ref={ref} className="showcase-demo trace mono" aria-label="Illustrative IncidentIQ investigation trace">
-      <div className="win-bar"><i /><i /><i /><span>agent trace · LangSmith</span></div>
+    <div ref={ref} className="showcase-demo trace mono" aria-label={label}>
+      <div className="win-bar"><i /><i /><i /><span>{title}</span></div>
       <ol className="trace-lines">
-        {TRACE.slice(0, Math.min(n, TRACE.length)).map((l, i) => (
+        {TRACE_.slice(0, Math.min(n, TRACE_.length)).map((l, i) => (
           <li key={i} className={`tr-${l.t}`}>{l.s}</li>
         ))}
-        {n < TRACE.length && <li className="tr-cursor"><span className="rot-caret" /></li>}
+        {n < TRACE_.length && <li className="tr-cursor"><span className="rot-caret" /></li>}
       </ol>
       <span className="demo-note">illustrative run</span>
     </div>
@@ -444,4 +460,55 @@ export function Stage3D({ children, flip }) {
       <span className="s3-floor" aria-hidden="true" />
     </div>
   );
+}
+
+const RAG_TRACE = [
+  { t: "cmd", s: '$ POST /api/ask "hypertension management guidelines"' },
+  { t: "step", s: "▸ embed query · FAISS top_k=5" },
+  { t: "ok", s: "  ✓ 5 passages from 3 sources" },
+  { t: "step", s: "▸ rank passages · LangChain" },
+  { t: "ok", s: "  ✓ best match selected" },
+  { t: "step", s: "▸ LLM answer with citations [1] [2]" },
+  { t: "ok", s: "  ✓ 200 OK · React chat UI" },
+  { t: "result", s: "● 92% answer relevance on eval set" },
+];
+
+export { MOVIE_TRACE, RAG_TRACE };
+
+/* Horizontal project carousel state: which card is centred, can we go back/forward */
+export function useCarousel(count) {
+  const track = useRef(null);
+  const [idx, setIdx] = useState(0);
+  const [edges, setEdges] = useState({ start: true, end: count <= 1 });
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const update = () => {
+      const cards = [...el.children];
+      const left = el.scrollLeft;
+      let best = 0, bestD = Infinity;
+      cards.forEach((c, i) => {
+        const d = Math.abs(c.offsetLeft - el.offsetLeft - left);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      const atEnd = left + el.clientWidth >= el.scrollWidth - 4;
+      setIdx(atEnd && left > 4 ? cards.length - 1 : best);
+      setEdges({ start: left <= 4, end: atEnd });
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      removeEventListener("resize", update);
+    };
+  }, [count]);
+  const go = (i) => {
+    const el = track.current;
+    if (!el) return;
+    const n = Math.max(0, Math.min(count - 1, i));
+    const card = el.children[n];
+    if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: prefersReduced() ? "auto" : "smooth" });
+  };
+  return { track, idx, edges, go };
 }

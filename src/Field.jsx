@@ -54,11 +54,11 @@ export default function Field({ className = "", density = 1 }) {
       };
     };
 
-    const target = () => Math.max(22, Math.min(110, Math.round(((w * h) / 15000) * density)));
+    const target = () => Math.max(14, Math.min(60, Math.round(((w * h) / 30000) * density)));
     const makeNode = (x, y) => {
       const a = Math.random() * Math.PI * 2;
       const s = 0.15 + Math.random() * 0.35;
-      const hub = Math.random() < 0.09;
+      const hub = Math.random() < 0.04;
       return {
         x: x ?? Math.random() * w, y: y ?? Math.random() * h, vx: Math.cos(a) * s * (hub ? 0.5 : 1), vy: Math.sin(a) * s * (hub ? 0.5 : 1),
         r: hub ? 3.2 + Math.random() * 1.6 : 1.1 + Math.random() * 1.8, ph: Math.random() * 6.28, extra: x != null, hub, flash: 0,
@@ -109,7 +109,7 @@ export default function Field({ className = "", density = 1 }) {
       }
     };
 
-    const LINK = 130, REACH = 180;
+    const LINK = 115, REACH = 170;
 
     const neighbour = (p, avoid) => {
       let best = null, tries = 0;
@@ -329,7 +329,7 @@ export default function Field({ className = "", density = 1 }) {
         else if (p.y > h + 20) p.y = -20;
       }
       for (const p of nodes) p.flash *= 0.94;
-      if (t % 14 === 0 && pulses.length < 34) spawnPulse();
+      if (t % 45 === 0 && pulses.length < 8) spawnPulse();
       if (mouse.on && t % 9 === 0) {
         const close = nodes.filter((p) => p.near > 0.2);
         if (close.length) spawnPulse(close[(Math.random() * close.length) | 0], 3);
@@ -346,14 +346,12 @@ export default function Field({ className = "", density = 1 }) {
         } else next.push(s2);
       }
       pulses = next;
-      if (t % 70 === 0 && words.length < Math.max(3, Math.round(w / 220))) spawnWord();
+      
       for (const wd of words) {
         wd.y += wd.vy;
         wd.life++;
       }
       words = words.filter((wd) => wd.life < wd.max);
-      scanY += 2.2;
-      if (scanY > h + 600) scanY = -100;
       for (const g of rings) {
         g.r += 4;
         g.life -= 0.025;
@@ -406,10 +404,6 @@ export default function Field({ className = "", density = 1 }) {
 
     readColors();
     resize();
-    for (let i = 0; i < 3; i++) {
-      spawnWord();
-      words[words.length - 1].life = Math.random() * 200;
-    }
     const ro = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
     ro ? ro.observe(canvas) : window.addEventListener("resize", resize);
     const io =

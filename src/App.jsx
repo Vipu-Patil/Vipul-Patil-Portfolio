@@ -8,7 +8,7 @@ import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
   RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
-  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D, Stack3D, Stage3D,
+  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D, Stack3D, Stage3D, MOVIE_TRACE, RAG_TRACE, useCarousel,
 } from "./Showpieces.jsx";
 
 /* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
@@ -482,7 +482,7 @@ function ProjectCard({ p, i, active }) {
         <span className="term-date">{p.date}</span>
       </div>
       <div className="project-copy">
-      {p.demo && <span className="feature-badge mono">Featured build</span>}
+      {i === 0 && <span className="feature-badge mono">Latest build</span>}
       <h3><Scramble text={p.name} play={inView} /></h3>
       <p className="project-kicker">{p.kicker}</p>
       <ul>
@@ -505,22 +505,50 @@ function ProjectCard({ p, i, active }) {
       </div>
       {p.demo && (
         <Stage3D flip={i % 2 === 1}>
-          {p.demo === "trace" ? <AgentTrace /> : <BrowserDemo />}
+          {p.demo === "trace" ? <AgentTrace /> : p.demo === "movie" ? (
+            <AgentTrace lines={MOVIE_TRACE} title="GET /api/fact · server log" label="Illustrative Movie Memory request log" />
+          ) : p.demo === "rag" ? (
+            <AgentTrace lines={RAG_TRACE} title="RAG pipeline · request log" label="Illustrative healthcare RAG request log" />
+          ) : <BrowserDemo />}
         </Stage3D>
       )}
     </article>
   );
 }
 
-function Projects({ active }) {
+function ProjectCarousel({ active }) {
+  const { track, idx, edges, go } = useCarousel(projects.length);
   return (
-    <section className="wrap section">
-      <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" note="The two featured builds run a live, illustrative demo." big="BUILT" />
-      <div className="projects">
+    <div className="carousel" role="region" aria-roledescription="carousel" aria-label="Projects">
+      <div className="car-bar">
+        <span className="car-count mono" aria-live="polite">
+          <b>{String(idx + 1).padStart(2, "0")}</b> / {String(projects.length).padStart(2, "0")}
+          <span className="car-name"> · {projects[idx]?.name}</span>
+        </span>
+        <div className="car-dots" role="tablist" aria-label="Choose a project">
+          {projects.map((p, i) => (
+            <button key={p.name} type="button" role="tab" aria-selected={i === idx} aria-label={p.name} className={i === idx ? "on" : ""} onClick={() => go(i)} />
+          ))}
+        </div>
+        <div className="car-btns">
+          <button type="button" className="car-btn" onClick={() => go(idx - 1)} disabled={edges.start} aria-label="Previous project">←</button>
+          <button type="button" className="car-btn" onClick={() => go(idx + 1)} disabled={edges.end} aria-label="Next project">→</button>
+        </div>
+      </div>
+      <div className={`projects proj-track ${edges.start ? "" : "faded-start"}`} ref={track} tabIndex={0}>
         {projects.map((p, i) => (
           <ProjectCard key={p.name} p={p} i={i} active={active} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function Projects({ active }) {
+  return (
+    <section className="wrap section">
+      <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" note="Scroll sideways or use the arrows. Each build runs a live, illustrative demo." big="BUILT" />
+      <ProjectCarousel active={active} />
     </section>
   );
 }
@@ -735,8 +763,6 @@ export default function App() {
       <div className="bg-layer" aria-hidden="true">
         <span className="blob b1" />
         <span className="blob b2" />
-        <span className="blob b3" />
-        <span className="bg-grid" />
         <Field />
       </div>
       <Nav />
@@ -749,7 +775,7 @@ export default function App() {
         </div>
         <div className="lab">
           <div className="lab-grid" aria-hidden="true" />
-          <Field className="lab-field" density={0.75} />
+          <Field className="lab-field" density={0.6} />
           <Metrics />
           <Experience active={active} />
           <Projects active={active} />
