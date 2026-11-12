@@ -3,7 +3,6 @@ import { profile, pillars, metrics, experience, projects, skills, education } fr
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
 import ContactForm from "./ContactForm.jsx";
-const Core3D = React.lazy(() => import("./Core3D.jsx"));
 import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
@@ -167,9 +166,6 @@ function Nav() {
 function Hero() {
   return (
     <section className="hero wrap" id="top">
-      <React.Suspense fallback={null}>
-        <Core3D className="hero-core" />
-      </React.Suspense>
       <div className="hero-copy">
         <p className="eyebrow mono" data-reveal>
           <span className="pulse" aria-hidden="true" /> {profile.currently} · {profile.location}
