@@ -152,9 +152,9 @@ export default function ContactForm({ to, handle }) {
         )}
         {plane && (
           <svg className="cf-plane" viewBox="0 0 48 48" aria-hidden="true">
-            <path d="M4 22 44 6 34 42 24 28Z" fill="#e3b866" />
-            <path d="M24 28 44 6 18 25Z" fill="#b98b3a" />
-            <path d="M24 28 22 38 28 31" fill="#8a6624" />
+            <path d="M4 22 44 6 34 42 24 28Z" fill="#a3e635" />
+            <path d="M24 28 44 6 18 25Z" fill="#65a30d" />
+            <path d="M24 28 22 38 28 31" fill="#3f6212" />
           </svg>
         )}
       </form>
