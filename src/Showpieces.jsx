@@ -414,27 +414,45 @@ export function BrowserDemo() {
 /* 3D tilt toward the cursor, with a moving glare, for any [data-tilt] element */
 export function useTilt3D() {
   useEffect(() => {
-    if (!matchMedia("(pointer: fine)").matches || prefersReduced()) return;
-    let cur = null;
-    const reset = (el) => {
-      el.style.transform = "";
-      el.classList.remove("tilting");
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches || prefersReduced()) return;
+    const live = new Map(); // el -> {x, y, tx, ty}
+    let raf = 0, cur = null;
+    const tick = () => {
+      let moving = false;
+      live.forEach((st, el) => {
+        // critically damped follow: eases toward target, settles without overshoot
+        st.x += (st.tx - st.x) * 0.14;
+        st.y += (st.ty - st.y) * 0.14;
+        const max = parseFloat(el.dataset.tilt) || 4;
+        el.style.transform = `perspective(1000px) rotateX(${(st.y * max).toFixed(3)}deg) rotateY(${(st.x * max).toFixed(3)}deg)`;
+        if (Math.abs(st.tx - st.x) > 0.001 || Math.abs(st.ty - st.y) > 0.001) moving = true;
+        else if (st.tx === 0 && st.ty === 0) {
+          el.style.transform = "";
+          el.classList.remove("tilting");
+          live.delete(el);
+        }
+      });
+      raf = moving || live.size ? requestAnimationFrame(tick) : 0;
     };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
     const move = (e) => {
       const el = e.target.closest && e.target.closest("[data-tilt]");
-      if (cur && cur !== el) reset(cur);
+      if (cur && cur !== el) { const st = live.get(cur); if (st) { st.tx = 0; st.ty = 0; } }
       cur = el;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-      const max = parseFloat(el.dataset.tilt) || 8;
-      el.style.transform = `perspective(900px) rotateX(${((0.5 - py) * max).toFixed(2)}deg) rotateY(${((px - 0.5) * max).toFixed(2)}deg) translateZ(0)`;
-      el.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
-      el.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
-      el.classList.add("tilting");
+      if (el) {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+        const st = live.get(el) || { x: 0, y: 0, tx: 0, ty: 0 };
+        st.tx = px - 0.5; st.ty = 0.5 - py;
+        live.set(el, st);
+        el.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
+        el.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
+        el.classList.add("tilting");
+      }
+      kick();
     };
     addEventListener("pointermove", move, { passive: true });
-    return () => removeEventListener("pointermove", move);
+    return () => { cancelAnimationFrame(raf); removeEventListener("pointermove", move); };
   }, []);
 }
 

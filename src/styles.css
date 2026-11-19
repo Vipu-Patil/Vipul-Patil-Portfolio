@@ -108,7 +108,7 @@ p { margin: 0; }
 .sun-moon {
   width: 16px; height: 16px; border-radius: 50%; background: var(--highlight);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--highlight) 35%, transparent);
-  transition: all .35s;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
 }
 .sun-moon[data-dark="1"] { background: transparent; box-shadow: inset -5px -3px 0 0 var(--ink); }
 
@@ -1463,3 +1463,142 @@ body { background: var(--bg); color: var(--ink); }
 .cursor-ring { border-color: #a3e635; } .cursor-ring.hot { border-color: #a3e635; background: rgba(163, 230, 53, 0.12); } .cursor-dot { background: #a3e635; }
 .progress span { background: #a3e635; box-shadow: 0 0 12px #a3e635; }
 :focus-visible { outline-color: #a3e635; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN-ENGINEERING PASS
+   Emil Kowalski: strong custom easing, short UI durations, press
+   feedback, hover gated to real pointers, no scale-from-nothing.
+   Impeccable craft floor: soft depth instead of hard offset blocks,
+   no one-sided bars, no decorative halos, themed browser surfaces.
+   Taste: quiet micro-interactions, nothing tilts hard, one system.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.22), 0 10px 28px -12px rgba(0, 0, 0, 0.45);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.22), 0 22px 48px -18px rgba(0, 0, 0, 0.6);
+  --ring-lime: 0 0 0 1px rgba(163, 230, 53, 0.55);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --shadow-1: 0 1px 2px rgba(10, 10, 10, 0.06), 0 10px 28px -14px rgba(10, 10, 10, 0.22);
+    --shadow-2: 0 2px 4px rgba(10, 10, 10, 0.06), 0 24px 48px -20px rgba(10, 10, 10, 0.3);
+    --ring-lime: 0 0 0 1px rgba(77, 124, 15, 0.6);
+  }
+}
+:root[data-theme="light"] {
+  --shadow-1: 0 1px 2px rgba(10, 10, 10, 0.06), 0 10px 28px -14px rgba(10, 10, 10, 0.22);
+  --shadow-2: 0 2px 4px rgba(10, 10, 10, 0.06), 0 24px 48px -20px rgba(10, 10, 10, 0.3);
+  --ring-lime: 0 0 0 1px rgba(77, 124, 15, 0.6);
+}
+
+/* Browser surfaces carry the design too */
+html { scrollbar-color: #3a3a3a transparent; accent-color: #a3e635; }
+input, textarea { caret-color: #a3e635; }
+a { text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
+.car-count, .job-when, .term-date, .metric-val, .cf-bytes, .bp-cell dd { font-variant-numeric: tabular-nums; }
+
+/* Icons */
+.ico { width: 1em; height: 1em; flex: none; vertical-align: -0.125em; }
+.btn .ico, .repo .ico, .cf-send .ico { transition: transform 200ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .ico, .repo:hover .ico, .cf-send:hover .ico { transform: translate(2px, -2px); }
+}
+.car-btn { display: inline-grid; place-items: center; }
+.car-btn .ico { width: 18px; height: 18px; }
+.cf-check .ico { width: 26px; height: 26px; stroke-width: 2.5; }
+
+/* Pressables: exact properties, 160ms strong ease-out, scale on press */
+.btn, .car-btn, .repo, .cf-send, .cf-again, .theme-btn, .chip, .globe-tag, .ctab, .link-btn, .car-dots button, .job-head {
+  transition: transform 160ms var(--ease-out), background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, width 200ms var(--ease-out);
+}
+.btn:active, .car-btn:active:not(:disabled), .repo:active, .cf-send:active:not(:disabled), .cf-again:active, .theme-btn:active, .chip:active, .ctab:active, .link-btn:active, .job-head:active .plus { transform: scale(0.97); }
+.globe-tag:active { scale: 0.97; }
+
+/* Hover motion only for real pointers; touch taps don't get stuck */
+.btn:hover, .chip:hover, .ctab:hover, .tile:hover, .pillar:hover, .bp-card:hover, .roles li:hover, .hl:hover, .model-card:hover, .portrait:hover, .metric:hover .metric-val { transform: none; translate: none; }
+.ctab.on { transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-1px); }
+  .chip:hover { transform: translateY(-1px); }
+  .tile:hover, .bp-card:hover { translate: 0 -2px; }
+  .roles li:hover { transform: translateY(-2px); }
+}
+
+/* Depth: soft offset + blur instead of zero-blur offset blocks */
+.btn:hover, .btn.primary:hover, .contact .btn:hover { box-shadow: var(--shadow-1); }
+.model-card { box-shadow: var(--shadow-2), var(--ring-lime); transform: rotate(0.6deg); transition: transform 300ms var(--ease-out), box-shadow 200ms ease; }
+.portrait { box-shadow: var(--shadow-2), var(--ring-lime); transform: rotate(-1.5deg); transition: transform 300ms var(--ease-out); }
+.ctab.on.c0, .ctab.on.c1, .ctab.on.c2 { box-shadow: var(--shadow-1); }
+.tile, .bp-card { box-shadow: none; transition: translate 200ms var(--ease-out), box-shadow 200ms ease; }
+.tile:hover, .t5:hover, .bp-card:hover, .pillar:hover { box-shadow: var(--shadow-2); }
+.bp-card { box-shadow: var(--shadow-1); }
+.cf-shell { box-shadow: var(--shadow-2); }
+.repo:hover { box-shadow: var(--shadow-1); }
+
+/* No one-sided accent bars: full hairline borders and tints */
+.result { border: 1px solid var(--line); border-left: 1px solid var(--line); border-radius: 10px; }
+.result:first-child { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.rag-a { border-left: 0; padding: 8px 10px; background: rgba(163, 230, 53, 0.06); border: 1px solid rgba(163, 230, 53, 0.2); border-radius: 8px; }
+
+/* Decorative halos off; glow is not depth */
+.lab .section-title h2, .lab .metric-val, .tr-result, .cf-sig.on, .cf-log .win { text-shadow: none; }
+.tag.on, .globe-tag.on, .car-dots button.on, .progress span, .cf-online i, .repo, .lab .tag.on, .plus.open, .lab .plus.open, .feature-badge { box-shadow: none; }
+.lab .kicker::after { content: none; }
+
+/* Remove the eyebrow spacing the old labels needed */
+.section-title { gap: 10px; }
+
+/* Scroll reveal: short travel, small blur to mask the crossfade, strong ease-out */
+.js-anim [data-reveal] {
+  transition-property: opacity, translate, scale, filter, rotate, transform, box-shadow, border-color, background-color;
+  transition-duration: 600ms, 700ms, 700ms, 500ms, 0ms, 160ms, 200ms, 200ms, 200ms;
+  transition-delay: var(--rv-d, 0ms), var(--rv-d, 0ms), var(--rv-d, 0ms), var(--rv-d, 0ms), 0ms, 0ms, 0ms, 0ms, 0ms;
+  transition-timing-function: var(--ease-out);
+}
+.js-anim [data-reveal]:not([data-shown]) { opacity: 0; translate: 0 14px; filter: blur(4px); rotate: none; scale: 1; }
+.js-anim [data-reveal="left"]:not([data-shown]) { translate: -16px 0; }
+.js-anim [data-reveal="right"]:not([data-shown]) { translate: 16px 0; }
+.js-anim [data-reveal="zoom"]:not([data-shown]), .js-anim [data-reveal="pop"]:not([data-shown]) { translate: 0 12px; scale: 0.97; }
+.lab .reveal {
+  --d: calc(var(--i, 0) * 70ms);
+  transition-property: opacity, translate, filter, rotate, transform, border-color, box-shadow;
+  transition-duration: 600ms, 700ms, 500ms, 0ms, 200ms, 200ms, 200ms;
+  transition-delay: var(--d), var(--d), var(--d), 0ms, 0ms, 0ms, 0ms;
+  transition-timing-function: var(--ease-out);
+}
+.js-anim .lab .reveal:not(.in) { translate: 0 16px; filter: blur(4px); rotate: none; opacity: 0; }
+.js-anim .lab .reveal.in .tag { animation-duration: 300ms; animation-timing-function: var(--ease-out); }
+
+/* UI transitions under 300ms */
+.console-panel { animation: panel-in 240ms var(--ease-out) both; }
+@keyframes panel-in { from { opacity: 0; translate: 0 6px; filter: blur(2px); } }
+.console-proof li { animation: line-in 260ms var(--ease-out) calc(var(--j, 0) * 45ms) both; }
+@keyframes line-in { from { opacity: 0; translate: -6px 0; } }
+.job-more { transition: grid-template-rows 320ms var(--ease-out); }
+.job-more.open li { animation: line-in 260ms var(--ease-out) calc(var(--j, 0) * 40ms + 60ms) both; }
+.plus { transition: transform 200ms var(--ease-out), background-color 200ms ease; }
+.globe-tag { transition-property: background-color, color, border-color, scale; }
+
+/* Never from nothing */
+@keyframes cf-pop { from { transform: scale(0.9); opacity: 0; } }
+@keyframes stamp-in { from { transform: rotate(-10deg) scale(1.15); opacity: 0; } }
+@keyframes bp-stamp { from { opacity: 0; transform: rotate(-8deg) scale(1.15); } to { opacity: .9; transform: rotate(-8deg) scale(1); } }
+
+/* Marquee separators: a drawn mark, not a glyph */
+.mq-sep { font-size: 0; width: 0.4em; height: 0.4em; margin: 0 0.9em; background: currentColor; transform: rotate(45deg); border-radius: 1px; }
+.ticker .mq-sep { width: 7px; height: 7px; }
+.mq-giant .mq-sep { width: 0.22em; height: 0.22em; }
+
+/* Reduced motion: fewer and gentler, not zero. Keep the fades, drop the travel. */
+@media (prefers-reduced-motion: reduce) {
+  .js-anim [data-reveal]:not([data-shown]), .js-anim .lab .reveal:not(.in) { opacity: 0; translate: none; scale: 1; filter: none; }
+  .js-anim [data-reveal], .lab .reveal { transition: opacity 300ms ease !important; }
+  .model-card, .portrait { transform: none; }
+}
+@media (min-width: 960px) {
+  .contact-copy { grid-template-areas: "status status" "title email" "title cta"; row-gap: 18px; align-items: end; }
+  .contact-copy > .email-row { align-self: end; }
+  .contact-copy > .cta-row { align-self: start; }
+}

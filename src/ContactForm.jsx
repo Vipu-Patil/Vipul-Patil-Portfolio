@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, Check } from "./Icons.jsx";
 
 /* "Sign & send" contact console.
    Left: the form. Right: a live preview of the request being composed.
@@ -95,7 +96,7 @@ export default function ContactForm({ to, handle }) {
         <div className="cf-card cf-done" role="status">
           <span className="cf-stamp mono" aria-hidden="true">DELIVERED</span>
           <p className="cf-to mono"><span>to</span> {handle}</p>
-          <div className="cf-check" aria-hidden="true">✓</div>
+          <div className="cf-check" aria-hidden="true"><Check /></div>
           <h3>Message sent{first ? `, ${first}` : ""}.</h3>
           <p>I’ll reply to <strong>{f.email}</strong>.</p>
           <p className="cf-sig-done">{f.name}</p>
@@ -138,7 +139,7 @@ export default function ContactForm({ to, handle }) {
           <span className={`cf-sig ${f.name ? "on" : ""}`} key={f.name.length > 0 ? "y" : "n"}>{f.name || "your signature"}</span>
         </div>
         <button className="cf-send mono" type="submit" disabled={state === "sending"}>
-          {state === "sending" ? "Sending…" : "Sign & send"} <span aria-hidden="true">↗</span>
+          {state === "sending" ? "Sending…" : "Sign & send"} <ArrowUpRight />
         </button>
         {state === "failed" && /activat/i.test(reason) && (
           <p className="cf-fail" role="alert">

@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { profile, pillars, metrics, experience, projects, skills, education } from "./data.js";
 import photo from "./assets/vipul.jpg";
 import Field from "./Field.jsx";
+import { ArrowUpRight, ArrowLeft, ArrowRight } from "./Icons.jsx";
 import ContactForm from "./ContactForm.jsx";
 import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
-  RotatingWord, ScrollProgress, CursorRing, useMagnetic, Marquee, CountUp,
+  RotatingWord, ScrollProgress, CursorRing, Marquee, CountUp,
   ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D, Stack3D, Stage3D, MOVIE_TRACE, RAG_TRACE, useCarousel,
 } from "./Showpieces.jsx";
 
@@ -188,7 +189,7 @@ function Hero() {
           <a className="btn" href="#contact">Get in touch</a>
           {profile.links.map((l) => (
             <a key={l.label} className="btn ghost" href={l.url} target="_blank" rel="noreferrer">
-              {l.label} ↗
+              {l.label} <ArrowUpRight />
             </a>
           ))}
         </div>
@@ -196,10 +197,10 @@ function Hero() {
           <span className="hint-dot" /> move your cursor around · click anywhere
         </p>
       </div>
-      <figure className="portrait tilt-glare" data-reveal="zoom" data-tilt="14">
+      <figure className="portrait tilt-glare" data-reveal="zoom" data-tilt="3">
         <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
       </figure>
-      <aside className="model-card tilt-glare" aria-label="Model card" data-reveal="right" data-tilt="8">
+      <aside className="model-card tilt-glare" aria-label="Model card" data-reveal="right" data-tilt="4">
         <div className="mc-head mono">
           <span>MODEL CARD</span>
           <span className="mc-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -306,7 +307,6 @@ function SectionTitle({ id, kicker, title, note, big }) {
   return (
     <div className="section-title" id={id} data-reveal="left">
       {big && <span className="bigword" aria-hidden="true">{big}</span>}
-      <p className="mono small kicker">{kicker}</p>
       <h2>{title}</h2>
       {note && <p className="muted">{note}</p>}
     </div>
@@ -494,7 +494,7 @@ function ProjectCard({ p, i, active }) {
         </div>
         {p.url && (
           <a className="repo" href={p.url} target="_blank" rel="noreferrer">
-            View code ↗
+            View code <ArrowUpRight />
           </a>
         )}
       </div>
@@ -527,8 +527,8 @@ function ProjectCarousel({ active }) {
           ))}
         </div>
         <div className="car-btns">
-          <button type="button" className="car-btn" onClick={() => go(idx - 1)} disabled={edges.start} aria-label="Previous project">←</button>
-          <button type="button" className="car-btn" onClick={() => go(idx + 1)} disabled={edges.end} aria-label="Next project">→</button>
+          <button type="button" className="car-btn" onClick={() => go(idx - 1)} disabled={edges.start} aria-label="Previous project"><ArrowLeft /></button>
+          <button type="button" className="car-btn" onClick={() => go(idx + 1)} disabled={edges.end} aria-label="Next project"><ArrowRight /></button>
         </div>
       </div>
       <div className={`projects proj-track ${edges.start ? "" : "faded-start"}`} ref={track} tabIndex={0}>
@@ -565,7 +565,6 @@ function Skills({ active, setActive }) {
           <SkillGlobe groups={skills} active={active} onPick={setActive} />
         </div>
         <div className="globe-side" data-reveal="right">
-          <p className="mono small kicker">Interactive</p>
           <h3>Spin the stack</h3>
           <p className="muted">Drag the globe to turn it. Pick any skill to light up the jobs and projects where I used it.</p>
           <ul className="globe-legend mono small">
@@ -592,7 +591,7 @@ function Skills({ active, setActive }) {
       </div>
       <div className="skill-groups bento">
         {skills.map((g, gi) => (
-          <div className={`skill-group tile tilt-glare t${gi}`} key={g.group} data-reveal="pop" data-tilt="6">
+          <div className={`skill-group tile tilt-glare t${gi}`} key={g.group} data-reveal="pop" data-tilt="3">
             <span className="tile-count" aria-hidden="true">{String(g.items.length).padStart(2, "0")}</span>
             <h3 className="mono small">{g.group}</h3>
             <div className="chips">
@@ -613,7 +612,7 @@ function EduSheet({ ed, i, total }) {
   const [ref, inView] = useInView();
   const degreeShort = ed.degree.replace("Master of Science", "M.S.").replace("Bachelor of Science", "B.S.");
   return (
-    <article ref={ref} className={`bp-card tilt-glare ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"} data-tilt="7">
+    <article ref={ref} className={`bp-card tilt-glare ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"} data-tilt="3">
       <div className="bp-sheet" onPointerMove={spot}>
         <span className="bp-cross" aria-hidden="true" />
         <span className="bp-stamp mono" aria-hidden="true">{ed.end.slice(-4)}</span>
@@ -696,7 +695,6 @@ function Contact() {
       <div className="wrap contact-inner">
         <div className="contact-copy">
         <p className="status mono" data-reveal><span className="pulse" aria-hidden="true" /> Open to Software, Automation &amp; AI Engineer roles</p>
-        <p className="mono small kicker" data-reveal>Contact</p>
         <h2 data-reveal>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
         <div className="email-row" data-reveal>
           <span id="email-text" className="email">{profile.email}</span>
@@ -705,7 +703,7 @@ function Contact() {
         <div className="cta-row" data-reveal>
           {profile.links.map((l) => (
             <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer">
-              {l.label} ↗
+              {l.label} <ArrowUpRight />
             </a>
           ))}
         </div>
@@ -730,7 +728,8 @@ function useScrollReveal() {
     }
     els.forEach((el) => {
       const sibs = [...el.parentElement.children].filter((c) => c.hasAttribute("data-reveal"));
-      el.style.setProperty("--rv-d", `${Math.min(sibs.indexOf(el), 8) * 110}ms`);
+      const STAG = [0, 50, 90, 120, 145, 165, 180, 190, 200];
+      el.style.setProperty("--rv-d", `${STAG[Math.min(sibs.indexOf(el), STAG.length - 1)]}ms`);
     });
     const io = new IntersectionObserver(
       (entries) =>
@@ -750,7 +749,6 @@ function useScrollReveal() {
 export default function App() {
   const [active, setActive] = useState("");
   useScrollReveal();
-  useMagnetic();
   useTilt3D();
   return (
     <>
