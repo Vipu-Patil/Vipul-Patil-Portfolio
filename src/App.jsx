@@ -7,14 +7,11 @@ import ContactForm from "./ContactForm.jsx";
 import SkillGlobe from "./SkillGlobe.jsx";
 import Blueprint, { SystemBlueprint } from "./Blueprint.jsx";
 import {
-  RotatingWord, ScrollProgress, CursorRing, Marquee, CountUp,
-  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced, useTilt3D, Stack3D, Stage3D, MOVIE_TRACE, RAG_TRACE, useCarousel,
+  ApiLog, PipelineRun, RagStream, AgentTrace, BrowserDemo, useOnScreen, prefersReduced,
+  useTilt3D, Stack3D, Stage3D, MOVIE_TRACE, RAG_TRACE, useCarousel,
 } from "./Showpieces.jsx";
 
-/* ───────── Tiny in-browser retriever (TF-IDF + cosine) ─────────
-   A playful nod to the RAG work: visitors type a question and the
-   page retrieves the most relevant lines from the resume. */
-
+/* ───────── Tiny in-browser retriever (TF-IDF + cosine) ───────── */
 const STOP = new Set(
   "a an and are as at be by for from has have i in into is it its me my of on or our over that the their this to was what where which who with you your do did does how can about any".split(" ")
 );
@@ -70,256 +67,18 @@ function buildIndex() {
   };
 }
 
-const SUGGESTIONS = ["backend APIs and latency", "automation and CI/CD", "AI agents", "fraud detection", "RAG and vector search", "education"];
 
-function AskMyResume() {
-  const search = useMemo(buildIndex, []);
-  const [q, setQ] = useState("fraud detection");
-  const results = useMemo(() => (q.trim() ? search(q) : []), [q, search]);
-
-  return (
-    <section className="ask" aria-labelledby="ask-title" data-reveal="zoom">
-      <div className="ask-head">
-        <h2 id="ask-title">Ask my resume</h2>
-        <p className="mono small muted">A tiny TF-IDF retriever running in your browser. Top 3 chunks by cosine similarity.</p>
-      </div>
-      <label className="ask-input">
-        <span className="mono prompt" aria-hidden="true">query&gt;</span>
-        <input id="ask-query" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Try “evaluation”, “AWS”, “LLaMA”…" autoComplete="off" />
-      </label>
-      <div className="chips" role="list">
-        {SUGGESTIONS.map((s) => (
-          <button key={s} role="listitem" className={`chip ${q === s ? "on" : ""}`} onClick={() => setQ(s)}>
-            {s}
-          </button>
-        ))}
-      </div>
-      <ol className="results">
-        {results.length === 0 && <li className="result empty">No matching lines. Try “fraud”, “agents”, “pgvector” or “Northeastern”.</li>}
-        {results.map((r, i) => (
-          <li className="result" key={r.source + i} style={{ "--d": `${i * 70}ms` }}>
-            <div className="result-meta mono small">
-              <span>{r.source}</span>
-              <span className="score">
-                <span className="bar">
-                  <span style={{ width: `${Math.min(100, Math.round(r.score * 100))}%` }} />
-                </span>
-                {r.score.toFixed(2)}
-              </span>
-            </div>
-            <p>{r.text}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-/* ───────── Theme toggle ───────── */
-function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem("vp-theme") || "";
-    } catch {
-      return "";
-    }
-  });
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme) root.setAttribute("data-theme", theme);
-    try {
-      theme ? localStorage.setItem("vp-theme", theme) : localStorage.removeItem("vp-theme");
-    } catch {}
-  }, [theme]);
-  const isDark = () =>
-    theme ? theme === "dark" : window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return [isDark, () => setTheme(isDark() ? "light" : "dark")];
-}
-
-function Nav() {
-  const [isDark, toggle] = useTheme();
-  return (
-    <header className="nav">
-      <div className="wrap nav-inner">
-        <a href="#top" className="logo" aria-label="Back to top">
-          VP<span className="dot" />
-        </a>
-        <nav className="nav-links" aria-label="Sections">
-          <a href="#what">What I do</a>
-          <a href="#work">Work</a>
-          <a href="#projects">Projects</a>
-          <a href="#skills">Skills</a>
-          <a href="#education">Education</a>
-          <a href="#contact">Contact</a>
-        </nav>
-        <button
-          className="theme-btn"
-          onClick={toggle}
-          aria-label="Toggle dark mode"
-        >
-          <span className="sun-moon" data-dark={isDark() ? "1" : "0"} />
-        </button>
-      </div>
-    </header>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="hero wrap" id="top">
-      <div className="hero-copy">
-        <p className="eyebrow mono" data-reveal>
-          <span className="pulse" aria-hidden="true" /> {profile.currently} · {profile.location}
-        </p>
-        <h1 data-reveal>
-          Hi, I’m <span className="hl">{profile.firstName}</span>.
-          <br />
-          I build <RotatingWord words={profile.rotating} />
-          <br />
-          that run in production.
-        </h1>
-        <ul className="roles" aria-label="Roles" data-reveal>
-          {profile.roles.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-        <p className="lede" data-reveal>{profile.summary}</p>
-        <div className="cta-row" data-reveal>
-          <a className="btn primary" href="#projects">See projects</a>
-          <a className="btn" href="#contact">Get in touch</a>
-          {profile.links.map((l) => (
-            <a key={l.label} className="btn ghost" href={l.url} target="_blank" rel="noreferrer">
-              {l.label} <ArrowUpRight />
-            </a>
-          ))}
-        </div>
-        <p className="hint mono small" aria-hidden="true" data-reveal>
-          <span className="hint-dot" /> move your cursor around · click anywhere
-        </p>
-      </div>
-      <figure className="portrait tilt-glare" data-reveal="zoom" data-tilt="3">
-        <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
-      </figure>
-      <aside className="model-card tilt-glare" aria-label="Model card" data-reveal="right" data-tilt="4">
-        <div className="mc-head mono">
-          <span>MODEL CARD</span>
-          <span className="mc-dots" aria-hidden="true"><i /><i /><i /></span>
-        </div>
-        <dl>
-          {profile.modelCard.map((row) => (
-            <div className="mc-row" key={row.k}>
-              <dt className="mono">{row.k}</dt>
-              <dd>{row.v}</dd>
-            </div>
-          ))}
-        </dl>
-      </aside>
-    </section>
-  );
-}
-
-const DEMOS = [ApiLog, PipelineRun, RagStream];
-
-function WhatIDo() {
-  const [k, setK] = useState(0);
-  const [auto, setAuto] = useState(true);
-  const [ref, on] = useOnScreen(0.2);
-  useEffect(() => {
-    if (!auto || !on || prefersReduced()) return;
-    const t = setTimeout(() => setK((v) => (v + 1) % pillars.length), 8000);
-    return () => clearTimeout(t);
-  }, [k, auto, on]);
-  const p = pillars[k];
-  const Demo = DEMOS[k] || ApiLog;
-  return (
-    <section ref={ref} className="wrap section pillars-section">
-      <SectionTitle id="what" kicker="What I do" title="One engineer, three hats" note="Pick a role to see it running. Every claim comes from a system I shipped." big="ROLES" />
-      <div className="console" data-reveal="pop">
-        <div className="console-tabs" role="tablist" aria-label="Roles">
-          {pillars.map((x, i) => (
-            <button
-              key={x.role}
-              role="tab"
-              id={`role-tab-${i}`}
-              aria-selected={i === k}
-              aria-controls="role-panel"
-              className={`ctab c${i} ${i === k ? "on" : ""}`}
-              onClick={() => {
-                setK(i);
-                setAuto(false);
-              }}
-            >
-              <span className="ctab-role">{x.role}</span>
-              <span className="ctab-line">{x.line}</span>
-              {i === k && auto && on && <span className="ctab-timer" key={`t${k}`} />}
-            </button>
-          ))}
-        </div>
-        <div className={`console-panel c${k}`} role="tabpanel" id="role-panel" aria-labelledby={`role-tab-${k}`} key={k}>
-          <div className="console-proof">
-            <h3>{p.role}</h3>
-            <ul>
-              {p.proof.map((t, j) => (
-                <li key={t} style={{ "--j": j }}>{t}</li>
-              ))}
-            </ul>
-            <div className="tags">
-              {p.stack.map((t) => (
-                <span key={t} className="tag">{t}</span>
-              ))}
-            </div>
-          </div>
-          <Demo running={on} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Ticker() {
-  const a = [...skills[0].items, ...skills[2].items, ...skills[1].items];
-  const b = [...skills[3].items, ...skills[4].items, ...skills[5].items];
-  return (
-    <section className="ticker" aria-label="Tech stack">
-      <Marquee items={a} speed={55} />
-      <Marquee items={b} speed={60} reverse className="alt" />
-    </section>
-  );
-}
-
-function Metrics() {
-  return (
-    <section className="metrics" aria-label="Results">
-      <div className="wrap metrics-row">
-        {metrics.map((m) => (
-          <div className="metric" key={m.label} data-reveal="pop">
-            <div className="metric-val"><CountUp value={m.value} /></div>
-            <div className="metric-label">{m.label}</div>
-            <div className="mono small muted">{m.where}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SectionTitle({ id, kicker, title, note, big }) {
-  return (
-    <div className="section-title" id={id} data-reveal="left">
-      {big && <span className="bigword" aria-hidden="true">{big}</span>}
-      <h2>{title}</h2>
-      {note && <p className="muted">{note}</p>}
-    </div>
-  );
-}
-
+/* ───────── helpers ───────── */
 const lit = (tags, active) => (!active ? "" : tags.includes(active) ? "is-lit" : "is-dim");
 
-const reduceMotion = () =>
-  typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Bold the measurable part of a sentence: 40%, 10K+, 200 ms, 2 weeks, 8 hours ...
+const NUM = /((?:[<>~+−]\s?)?\d[\d,.]*(?:\s?(?:%|K\+|K\b|ms\b|hours?\b|minutes?\b|weeks?\b|days?\b|s\b(?= [A-Z]?[a-z]*\s?(?:OpenAI|timeout|boundary|window)))|\+(?=\s?coverage))(?:\s?(?:→|to)\s?(?:under\s)?\d[\d,.]*\s?(?:%|ms|hours?|minutes?|min|weeks?|days?))?)/g;
+function Emph({ text }) {
+  const parts = text.split(NUM);
+  return parts.map((p, i) => (i % 2 && /\d/.test(p) && !/^\d{4}$/.test(p.trim()) ? <b key={i}>{p}</b> : p));
+}
 
-/* Adds `in` to an element the first time it scrolls into view. */
-function useInView() {
+function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
@@ -335,320 +94,522 @@ function useInView() {
           io.disconnect();
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+      { threshold, rootMargin: "0px 0px -8% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [threshold]);
   return [ref, inView];
 }
 
-/* Decodes text from random glyphs when `play` turns true. */
-const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/{}[]#*+=";
-function Scramble({ text, play }) {
-  const [out, setOut] = useState(text);
+/* Words cross-fade with a short blur (masks the swap so it reads as one change) */
+function RotWord({ words, every = 2600 }) {
+  const [i, setI] = useState(0);
   useEffect(() => {
-    if (!play || reduceMotion()) {
-      setOut(text);
-      return;
-    }
-    let frame = 0;
-    const total = 26;
-    let raf;
-    const tick = () => {
-      frame += 1;
-      const done = Math.floor((frame / total) * text.length);
-      setOut(
-        text
-          .split("")
-          .map((ch, i) => (i < done || ch === " " ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
-          .join("")
-      );
-      if (frame < total) raf = requestAnimationFrame(tick);
-      else setOut(text);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [play, text]);
+    if (prefersReduced()) return;
+    const t = setInterval(() => setI((v) => (v + 1) % words.length), every);
+    return () => clearInterval(t);
+  }, [words.length, every]);
   return (
-    <span aria-label={text}>
-      <span aria-hidden="true">{out}</span>
+    <span className="rw" aria-hidden="true">
+      {words.map((w, j) => (
+        <span key={w} className={`rw-w ${j === i ? "on" : ""}`}>{w}</span>
+      ))}
     </span>
   );
 }
 
-/* Cursor spotlight for cards. */
-const spot = (ev) => {
-  const r = ev.currentTarget.getBoundingClientRect();
-  ev.currentTarget.style.setProperty("--mx", `${ev.clientX - r.left}px`);
-  ev.currentTarget.style.setProperty("--my", `${ev.clientY - r.top}px`);
-};
+/* ───────── theme ───────── */
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem("vp-theme") || "";
+    } catch {
+      return "";
+    }
+  });
+  useEffect(() => {
+    const root = document.documentElement;
+    theme ? root.setAttribute("data-theme", theme) : root.removeAttribute("data-theme");
+    try {
+      theme ? localStorage.setItem("vp-theme", theme) : localStorage.removeItem("vp-theme");
+    } catch {}
+  }, [theme]);
+  const isDark = () => (theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
+  return [isDark, () => setTheme(isDark() ? "light" : "dark")];
+}
 
-function Job({ e, i, active, open, onToggle }) {
-  const [ref, inView] = useInView();
+const SECTIONS = [
+  ["what", "What I do"],
+  ["work", "Experience"],
+  ["projects", "Projects"],
+  ["skills", "Skills"],
+  ["education", "Education"],
+  ["contact", "Contact"],
+];
+
+function useActiveSection() {
+  const [cur, setCur] = useState("");
+  useEffect(() => {
+    const els = SECTIONS.map(([id]) => document.getElementById(id)).filter(Boolean);
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (ens) => ens.forEach((en) => en.isIntersecting && setCur(en.target.id)),
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  return cur;
+}
+
+function Nav() {
+  const [isDark, toggle] = useTheme();
+  const [, force] = useState(0);
+  const cur = useActiveSection();
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(scrollY > 8);
+    on();
+    addEventListener("scroll", on, { passive: true });
+    return () => removeEventListener("scroll", on);
+  }, []);
   return (
-    <li ref={ref} className={`job reveal ${inView ? "in" : ""} ${lit(e.tags, active)}`} style={{ "--i": i }}>
-      <div className="job-when mono small">
-        <span className="node" aria-hidden="true" />
-        {e.start} – {e.end}
-      </div>
-      <div className={`job-body holo ${e.system ? "has-bp" : ""}`} onPointerMove={spot}>
-        <span className="scanline" aria-hidden="true" />
-        {e.system && (
-          <div className="job-bp bp-sheet" onPointerMove={spot}>
-            <span className="bp-cross" aria-hidden="true" />
-            {e.stamp && <span className="bp-stamp mono" aria-hidden="true">{e.stamp}</span>}
-            <Stack3D className="sys3d" render={() => <SystemBlueprint system={e.system} play={inView} />} />
-          </div>
-        )}
-        <div className="job-main">
-        <button className="job-head" onClick={onToggle} aria-expanded={open}>
-          <span>
-            <span className="job-role"><Scramble text={e.role} play={inView} /></span>
-            <span className="job-co">
-              {e.company} · {e.location}
-            </span>
-            <span className="job-blurb muted">{e.blurb}</span>
-          </span>
-          <span className={`plus ${open ? "open" : ""}`} aria-hidden="true" />
-        </button>
-        <div className={`job-more ${open ? "open" : ""}`}>
-          <div>
-            <ul className="job-bullets">
-              {e.bullets.map((b, j) => (
-                <li key={b} style={{ "--j": j }}>{b}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div className="tags">
-          {e.tags.map((t, j) => (
-            <span key={t} className={`tag ${t === active ? "on" : ""}`} style={{ "--j": j }}>{t}</span>
+    <header className={`nav ${scrolled ? "scrolled" : ""}`}>
+      <div className="wrap nav-inner">
+        <a href="#top" className="wordmark" aria-label="Vipul Patil, back to top">
+          <span className="wm-dot" aria-hidden="true" />
+          Vipul Patil
+        </a>
+        <nav className="nav-links" aria-label="Sections">
+          {SECTIONS.map(([id, label]) => (
+            <a key={id} href={`#${id}`} className={cur === id ? "on" : ""} aria-current={cur === id ? "true" : undefined}>
+              {label}
+            </a>
           ))}
-        </div>
-        </div>
+        </nav>
+        <button
+          className="icon-btn"
+          onClick={() => {
+            toggle();
+            force((n) => n + 1);
+          }}
+          aria-label={isDark() ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            {isDark() ? (
+              <>
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+              </>
+            ) : (
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            )}
+          </svg>
+        </button>
       </div>
-    </li>
+    </header>
   );
 }
 
-function Experience({ active }) {
-  const [open, setOpen] = useState(0);
+/* ───────── hero ───────── */
+function Hero() {
   return (
-    <section className="wrap section">
-      <SectionTitle id="work" kicker="Experience" title="Where I’ve shipped" note="Tap a role to expand it." big="SHIPPED" />
-      <ol className="timeline">
-        <span className="beam" aria-hidden="true" />
-        {experience.map((e, i) => (
-          <Job key={e.company} e={e} i={i} active={active} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
-        ))}
-      </ol>
+    <section className="hero" id="top">
+      <div className="wrap hero-grid">
+        <div className="hero-copy">
+          <h1 className="hero-title" aria-label={`${profile.name} builds backends, automation and AI that run in production.`}>
+            <span className="ln"><span>{profile.name} builds</span></span>
+            <span className="ln"><span><RotWord words={profile.rotating} /></span></span>
+            <span className="ln"><span>that run in production.</span></span>
+          </h1>
+          <p className="hero-lede enter" style={{ "--e": "420ms" }}>{profile.summary}</p>
+          <div className="hero-actions enter" style={{ "--e": "520ms" }}>
+            <a className="btn primary" href="#work">See my work</a>
+            <a className="btn" href="#contact">Get in touch</a>
+            <span className="hero-links">
+              {profile.links.map((l) => (
+                <a key={l.label} className="tlink" href={l.url} target="_blank" rel="noreferrer">
+                  {l.label} <ArrowUpRight />
+                </a>
+              ))}
+            </span>
+          </div>
+        </div>
+        <figure className="hero-photo enter" style={{ "--e": "200ms" }} data-tilt="3">
+          <img src={photo} alt={`Portrait of ${profile.name}`} width="480" height="600" />
+          <span className="now mono">
+            <i aria-hidden="true" /> {profile.currently}
+          </span>
+        </figure>
+      </div>
+      <div className="wrap">
+        <dl className="ledger enter" style={{ "--e": "640ms" }}>
+          {profile.modelCard
+            .filter((r) => !["model", "known limitation"].includes(r.k))
+            .map((r) => (
+              <div key={r.k}>
+                <dt className="mono">{r.k}</dt>
+                <dd>{r.v}</dd>
+              </div>
+            ))}
+        </dl>
+      </div>
     </section>
   );
 }
 
-function ProjectCard({ p, i, active }) {
-  const [ref, inView] = useInView();
-  const onMove = (ev) => {
-    spot(ev);
-    if (reduceMotion()) return;
-    const r = ev.currentTarget.getBoundingClientRect();
-    const x = (ev.clientX - r.left) / r.width - 0.5;
-    const y = (ev.clientY - r.top) / r.height - 0.5;
-    ev.currentTarget.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`);
-    ev.currentTarget.style.setProperty("--ry", `${(x * 8).toFixed(2)}deg`);
-  };
-  const onLeave = (ev) => {
-    ev.currentTarget.style.setProperty("--rx", "0deg");
-    ev.currentTarget.style.setProperty("--ry", "0deg");
-  };
-  const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+/* ───────── section shell (heading in a left rail on wide screens) ───────── */
+function Sec({ id, title, note, children, wide, aside }) {
   return (
-    <article
-      ref={ref}
-      className={`project holo reveal ${p.demo ? "feature" : ""} ${p.demo && i % 2 ? "flip" : ""} ${inView ? "in" : ""} ${lit(p.tags, active)}`}
-      style={{ "--i": i % 2 }}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-    >
-      <span className="scanline" aria-hidden="true" />
-      <div className="term mono small">
-        <span className="term-dots" aria-hidden="true"><i /><i /><i /></span>
-        <span className="term-path">~/projects/{slug}</span>
-        <span className="term-date">{p.date}</span>
+    <section className={`sec ${wide ? "wide" : "split"}`} id={id} aria-labelledby={`${id}-h`}>
+      <div className="wrap sec-grid">
+        <header className="sec-head" data-reveal>
+          <h2 id={`${id}-h`}>{title}</h2>
+          {note && <p className="sec-note">{note}</p>}
+          {aside}
+        </header>
+        <div className="sec-body">{children}</div>
       </div>
-      <div className="project-copy">
-      {i === 0 && <span className="feature-badge mono">Latest build</span>}
-      <h3><Scramble text={p.name} play={inView} /></h3>
-      <p className="project-kicker">{p.kicker}</p>
-      <ul>
-        {p.bullets.map((b) => (
-          <li key={b}>{b}</li>
-        ))}
-      </ul>
-      <div className="project-foot">
-        <div className="tags">
-          {p.stack.map((t, j) => (
-            <span key={t} className={`tag ${p.tags.includes(active) && t.includes(active) ? "on" : ""}`} style={{ "--j": j }}>{t}</span>
+    </section>
+  );
+}
+
+/* ───────── what I do ───────── */
+const DEMOS = [ApiLog, PipelineRun, RagStream];
+function WhatIDo() {
+  const [k, setK] = useState(0);
+  const [auto, setAuto] = useState(true);
+  const [ref, on] = useOnScreen(0.2);
+  useEffect(() => {
+    if (!auto || !on || prefersReduced()) return;
+    const t = setTimeout(() => setK((v) => (v + 1) % pillars.length), 8000);
+    return () => clearTimeout(t);
+  }, [k, auto, on]);
+  const p = pillars[k];
+  const Demo = DEMOS[k] || ApiLog;
+  return (
+    <Sec id="what" title="What I do" note="Three kinds of work, one habit: ship it, then measure it. Pick one to see a system like it running.">
+      <div ref={ref} className="roles" data-reveal>
+        <div className="role-tabs" role="tablist" aria-label="Roles">
+          {pillars.map((x, i) => (
+            <button
+              key={x.role}
+              role="tab"
+              id={`role-tab-${i}`}
+              aria-selected={i === k}
+              aria-controls="role-panel"
+              className={`role-tab ${i === k ? "on" : ""}`}
+              onClick={() => {
+                setK(i);
+                setAuto(false);
+              }}
+            >
+              <span className="rt-name">{x.role}</span>
+              <span className="rt-line">{x.line}</span>
+              {i === k && auto && on && <span className="rt-timer" key={`t${k}`} aria-hidden="true" />}
+            </button>
           ))}
         </div>
-        {p.url && (
-          <a className="repo" href={p.url} target="_blank" rel="noreferrer">
-            View code <ArrowUpRight />
-          </a>
-        )}
+        <div className="role-panel" role="tabpanel" id="role-panel" aria-labelledby={`role-tab-${k}`} key={k}>
+          <ul className="proof">
+            {p.proof.map((t, j) => (
+              <li key={t} style={{ "--j": j }}>
+                <Emph text={t} />
+              </li>
+            ))}
+          </ul>
+          <div className="demo-wrap">
+            <Demo running={on} />
+          </div>
+        </div>
       </div>
+    </Sec>
+  );
+}
+
+/* ───────── experience as case studies ───────── */
+function CaseStudy({ e, i, active }) {
+  const [ref, inView] = useInView(0.1);
+  const [open, setOpen] = useState(false);
+  const outcomes = metrics.filter((m) => m.where.endsWith(e.company.split(" ")[0]));
+  const lead = e.bullets.slice(0, 2);
+  const rest = e.bullets.slice(2);
+  return (
+    <article ref={ref} className={`case ${lit(e.tags, active)}`} data-reveal>
+      <div className="case-meta mono">
+        <span>{e.start} – {e.end}</span>
+        <span>{e.location}</span>
       </div>
-      {p.demo && (
-        <Stage3D flip={i % 2 === 1}>
-          {p.demo === "trace" ? <AgentTrace /> : p.demo === "movie" ? (
-            <AgentTrace lines={MOVIE_TRACE} title="GET /api/fact · server log" label="Illustrative Movie Memory request log" />
-          ) : p.demo === "rag" ? (
-            <AgentTrace lines={RAG_TRACE} title="RAG pipeline · request log" label="Illustrative healthcare RAG request log" />
-          ) : <BrowserDemo />}
-        </Stage3D>
+      <h3 className="case-title">
+        {e.role} <span className="at">at</span> {e.company}
+      </h3>
+      <p className="case-blurb">{e.blurb}</p>
+      {outcomes.length > 0 && (
+        <dl className="outcomes">
+          {outcomes.map((m) => (
+            <div key={m.label}>
+              <dt>{m.value}</dt>
+              <dd>{m.label}</dd>
+            </div>
+          ))}
+        </dl>
       )}
+      {e.system && (
+        <div className="plate" data-tilt="2">
+          <Stack3D className="sys3d" render={() => <SystemBlueprint system={e.system} play={inView} />} />
+          {e.stamp && <span className="plate-stamp mono" aria-hidden="true">{e.stamp}</span>}
+        </div>
+      )}
+      <ul className="case-points">
+        {lead.map((b) => (
+          <li key={b}><Emph text={b} /></li>
+        ))}
+      </ul>
+      {rest.length > 0 && (
+        <>
+          <div className={`more ${open ? "open" : ""}`} id={`more-${i}`}>
+            <div>
+              <ul className="case-points">
+                {rest.map((b, j) => (
+                  <li key={b} style={{ "--j": j }}><Emph text={b} /></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <button className="more-btn" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={`more-${i}`}>
+            {open ? "Show less" : `Show ${rest.length} more`}
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </>
+      )}
+      <ul className="tags" aria-label="Skills used">
+        {e.tags.map((t) => (
+          <li key={t} className={t === active ? "on" : ""}>{t}</li>
+        ))}
+      </ul>
     </article>
   );
 }
 
-function ProjectCarousel({ active }) {
-  const { track, idx, edges, go } = useCarousel(projects.length);
+function Experience({ active }) {
   return (
-    <div className="carousel" role="region" aria-roledescription="carousel" aria-label="Projects">
-      <div className="car-bar">
-        <span className="car-count mono" aria-live="polite">
-          <b>{String(idx + 1).padStart(2, "0")}</b> / {String(projects.length).padStart(2, "0")}
-          <span className="car-name"> · {projects[idx]?.name}</span>
-        </span>
-        <div className="car-dots" role="tablist" aria-label="Choose a project">
-          {projects.map((p, i) => (
-            <button key={p.name} type="button" role="tab" aria-selected={i === idx} aria-label={p.name} className={i === idx ? "on" : ""} onClick={() => go(i)} />
-          ))}
-        </div>
-        <div className="car-btns">
-          <button type="button" className="car-btn" onClick={() => go(idx - 1)} disabled={edges.start} aria-label="Previous project"><ArrowLeft /></button>
-          <button type="button" className="car-btn" onClick={() => go(idx + 1)} disabled={edges.end} aria-label="Next project"><ArrowRight /></button>
-        </div>
-      </div>
-      <div className={`projects proj-track ${edges.start ? "" : "faded-start"}`} ref={track} tabIndex={0}>
-        {projects.map((p, i) => (
-          <ProjectCard key={p.name} p={p} i={i} active={active} />
+    <Sec id="work" title="Experience" note="Healthcare claims, financial risk and medical data: systems that real teams relied on.">
+      <div className="cases">
+        {experience.map((e, i) => (
+          <CaseStudy key={e.company} e={e} i={i} active={active} />
         ))}
       </div>
-    </div>
+    </Sec>
+  );
+}
+
+/* ───────── projects: one row, scroll sideways ───────── */
+function ProjectCard({ p, i, active }) {
+  return (
+    <article className={`proj ${lit(p.tags, active)}`}>
+      {p.demo && (
+        <Stage3D flip={i % 2 === 1}>
+          {p.demo === "trace" ? (
+            <AgentTrace />
+          ) : p.demo === "movie" ? (
+            <AgentTrace lines={MOVIE_TRACE} title="GET /api/fact · server log" label="Illustrative Movie Memory request log" />
+          ) : p.demo === "rag" ? (
+            <AgentTrace lines={RAG_TRACE} title="RAG pipeline · request log" label="Illustrative healthcare RAG request log" />
+          ) : (
+            <BrowserDemo />
+          )}
+        </Stage3D>
+      )}
+      <div className="proj-copy">
+        <div className="proj-meta mono">
+          <span>{p.date}</span>
+          {i === 0 && <span className="badge">Latest</span>}
+        </div>
+        <h3>{p.name}</h3>
+        <p className="proj-kicker">{p.kicker}</p>
+        <ul className="proj-points">
+          {p.bullets.map((b) => (
+            <li key={b}><Emph text={b} /></li>
+          ))}
+        </ul>
+        <div className="proj-foot">
+          <ul className="tags" aria-label="Built with">
+            {p.stack.map((t) => (
+              <li key={t} className={active && t.includes(active) ? "on" : ""}>{t}</li>
+            ))}
+          </ul>
+          {p.url && (
+            <a className="tlink strong" href={p.url} target="_blank" rel="noreferrer">
+              View code <ArrowUpRight />
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }
 
 function Projects({ active }) {
+  const { track, idx, edges, go } = useCarousel(projects.length);
+  const controls = (
+    <div className="car-ctrl">
+      <span className="car-count mono" aria-live="polite">
+        {String(idx + 1).padStart(2, "0")} <span>/ {String(projects.length).padStart(2, "0")}</span>
+      </span>
+      <button type="button" className="icon-btn" onClick={() => go(idx - 1)} disabled={edges.start} aria-label="Previous project">
+        <ArrowLeft />
+      </button>
+      <button type="button" className="icon-btn" onClick={() => go(idx + 1)} disabled={edges.end} aria-label="Next project">
+        <ArrowRight />
+      </button>
+    </div>
+  );
   return (
-    <section className="wrap section">
-      <SectionTitle id="projects" kicker="Projects" title="Things I built on my own time" note="Scroll sideways or use the arrows. Each build runs a live, illustrative demo." big="BUILT" />
-      <ProjectCarousel active={active} />
-    </section>
+    <Sec id="projects" wide title="Projects" note="Things I built on my own time. Scroll sideways or use the arrows; each runs an illustrative demo." aside={controls}>
+      <div className="track" ref={track} tabIndex={0} role="region" aria-roledescription="carousel" aria-label="Projects" data-reveal>
+        {projects.map((p, i) => (
+          <ProjectCard key={p.name} p={p} i={i} active={active} />
+        ))}
+      </div>
+      <div className="car-dots" role="tablist" aria-label="Choose a project">
+        {projects.map((p, i) => (
+          <button key={p.name} type="button" role="tab" aria-selected={i === idx} aria-label={p.name} className={i === idx ? "on" : ""} onClick={() => go(i)} />
+        ))}
+      </div>
+    </Sec>
   );
 }
 
+/* ───────── skills ───────── */
 function Skills({ active, setActive }) {
   const usedIn = useMemo(() => {
     if (!active) return [];
     return [
-      ...experience.filter((e) => e.tags.includes(active)).map((e) => `${e.role} at ${e.company}`),
+      ...experience.filter((e) => e.tags.includes(active)).map((e) => `${e.company}`),
       ...projects.filter((p) => p.tags.includes(active)).map((p) => p.name),
     ];
   }, [active]);
   return (
-    <section className="wrap section">
-      <SectionTitle id="skills" kicker="Skills" title="The toolbox" note="Tap a skill to light up where I’ve used it on this page." big="STACK" />
-      <div className="skills-stage">
-        <div className="globe-wrap" data-reveal="zoom">
+    <Sec id="skills" title="Skills" note="Drag the globe, or pick any skill. The jobs and projects that used it light up on the page.">
+      <div className="skills" data-reveal>
+        <div className="globe-col">
           <SkillGlobe groups={skills} active={active} onPick={setActive} />
-        </div>
-        <div className="globe-side" data-reveal="right">
-          <h3>Spin the stack</h3>
-          <p className="muted">Drag the globe to turn it. Pick any skill to light up the jobs and projects where I used it.</p>
-          <ul className="globe-legend mono small">
-            {skills.map((g, gi) => (
-              <li key={g.group}><i className={`g${gi}`} />{g.group}</li>
-            ))}
-          </ul>
-          <div className={`used-in ${active ? "show" : ""}`} aria-live="polite" data-reveal>
-        {active ? (
-          <>
-            <strong>{active}</strong>
-            {usedIn.length ? (
-              <span> · used in {usedIn.join(", ")}. Scroll up to see them highlighted.</span>
+          <p className="used-in" aria-live="polite">
+            {active ? (
+              <>
+                <b>{active}</b>
+                {usedIn.length ? <> · used at {usedIn.join(", ")}</> : <> · in my toolkit</>}
+                <button className="tlink" onClick={() => setActive("")}>Clear</button>
+              </>
             ) : (
-              <span> · part of my toolkit, not tied to a specific entry here yet.</span>
+              <span>No skill selected</span>
             )}
-            <button className="link-btn" onClick={() => setActive("")}>Clear</button>
-          </>
-        ) : (
-          <span className="muted">No skill selected.</span>
-        )}
-          </div>
+          </p>
+        </div>
+        <div className="skill-lists">
+          {skills.map((g) => (
+            <div key={g.group} className="skill-group">
+              <h3>{g.group}</h3>
+              <ul>
+                {g.items.map((s) => (
+                  <li key={s}>
+                    <button className={`chip ${active === s ? "on" : ""}`} aria-pressed={active === s} onClick={() => setActive(active === s ? "" : s)}>
+                      {s}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
-      <div className="skill-groups bento">
-        {skills.map((g, gi) => (
-          <div className={`skill-group tile tilt-glare t${gi}`} key={g.group} data-reveal="pop" data-tilt="3">
-            <span className="tile-count" aria-hidden="true">{String(g.items.length).padStart(2, "0")}</span>
-            <h3 className="mono small">{g.group}</h3>
-            <div className="chips">
-              {g.items.map((s) => (
-                <button key={s} className={`chip skill ${active === s ? "on" : ""}`} onClick={() => setActive(active === s ? "" : s)} aria-pressed={active === s}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+    </Sec>
   );
 }
 
+/* ───────── ask my résumé ───────── */
+const SUGGESTIONS = ["backend APIs and latency", "automation and CI/CD", "AI agents", "fraud detection", "RAG and vector search", "education"];
+function AskMyResume() {
+  const search = useMemo(buildIndex, []);
+  const [q, setQ] = useState("fraud detection");
+  const results = useMemo(() => (q.trim() ? search(q) : []), [q, search]);
+  return (
+    <Sec id="ask" wide title="Ask my résumé" note="A small TF-IDF retriever that runs in your browser and returns the three closest lines.">
+      <div className="ask" data-reveal>
+        <label className="ask-input" htmlFor="ask-query">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <span className="sr">Search my résumé</span>
+          <input id="ask-query" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Try evaluation, AWS or LLaMA" autoComplete="off" />
+        </label>
+        <div className="ask-chips">
+          {SUGGESTIONS.map((s) => (
+            <button key={s} className={`chip ${q === s ? "on" : ""}`} onClick={() => setQ(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+        <ol className="results">
+          {results.length === 0 && <li className="result empty">No matching lines. Try fraud, agents, pgvector or Northeastern.</li>}
+          {results.map((r, i) => (
+            <li className="result" key={r.source + i}>
+              <div className="result-meta mono">
+                <span>{r.source}</span>
+                <span className="score">
+                  <span className="bar"><span style={{ width: `${Math.min(100, Math.round(r.score * 100))}%` }} /></span>
+                  {r.score.toFixed(2)}
+                </span>
+              </div>
+              <p>{r.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </Sec>
+  );
+}
+
+/* ───────── education ───────── */
 function EduSheet({ ed, i, total }) {
   const [ref, inView] = useInView();
-  const degreeShort = ed.degree.replace("Master of Science", "M.S.").replace("Bachelor of Science", "B.S.");
+  const short = ed.degree.replace("Master of Science", "M.S.").replace("Bachelor of Science", "B.S.").split(",")[0];
   return (
-    <article ref={ref} className={`bp-card tilt-glare ${inView ? "in" : ""}`} data-reveal={i % 2 ? "right" : "left"} data-tilt="3">
-      <div className="bp-sheet" onPointerMove={spot}>
+    <article ref={ref} className={`sheet ${inView ? "in" : ""}`} data-reveal data-tilt="2">
+      <div className="bp-sheet">
         <span className="bp-cross" aria-hidden="true" />
         <span className="bp-stamp mono" aria-hidden="true">{ed.end.slice(-4)}</span>
         <Stack3D render={() => <Blueprint kind={ed.sheet} play={inView} />} />
       </div>
-      <dl className="bp-block mono">
-        <div className="bp-cell wide">
-          <dt>Institution</dt>
+      <dl className="sheet-block">
+        <div className="wide">
+          <dt className="mono">Institution</dt>
           <dd><h3>{ed.school}</h3></dd>
         </div>
-        <div className="bp-cell wide">
-          <dt>Degree</dt>
+        <div className="wide">
+          <dt className="mono">Degree</dt>
           <dd>{ed.degree}</dd>
         </div>
-        <div className="bp-cell">
-          <dt>Location</dt>
+        <div>
+          <dt className="mono">Location</dt>
           <dd>{ed.location}</dd>
         </div>
-        <div className="bp-cell">
-          <dt>Dates</dt>
+        <div>
+          <dt className="mono">Dates</dt>
           <dd>{ed.start ? `${ed.start} – ` : ""}{ed.end}</dd>
         </div>
-        <div className="bp-cell">
-          <dt>Drawn by</dt>
-          <dd>V. Patil · {degreeShort.split(",")[0]}</dd>
+        <div>
+          <dt className="mono">Drawn by</dt>
+          <dd>V. Patil · {short}</dd>
         </div>
-        <div className="bp-cell">
-          <dt>Sheet</dt>
+        <div>
+          <dt className="mono">Sheet</dt>
           <dd>{String(i + 1).padStart(2, "0")} of {String(total).padStart(2, "0")}</dd>
         </div>
-        {ed.notes?.length > 0 && (
-          <div className="bp-cell wide">
-            <dt>Notes</dt>
-            <dd>{ed.notes.join(" · ")}</dd>
-          </div>
-        )}
       </dl>
     </article>
   );
@@ -656,59 +617,58 @@ function EduSheet({ ed, i, total }) {
 
 function Education() {
   return (
-    <section className="wrap section">
-      <SectionTitle id="education" kicker="Education" title="Where I trained" note="Drawn to scale, more or less." big="TRAINED" />
-      <div className="bp-list">
+    <Sec id="education" wide title="Education" note="Drawn to scale, more or less.">
+      <div className="sheets">
         {education.map((ed, i) => (
           <EduSheet key={ed.school + ed.degree} ed={ed} i={i} total={education.length} />
         ))}
       </div>
-    </section>
+    </Sec>
   );
 }
 
+/* ───────── contact ───────── */
 function Contact() {
   const [copied, setCopied] = useState(false);
-  const copy = () => {
-    const done = () => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    };
-    try {
-      navigator.clipboard.writeText(profile.email).then(done, () => selectEmail());
-    } catch {
-      selectEmail();
-    }
-  };
   const selectEmail = () => {
     const el = document.getElementById("email-text");
     if (!el) return;
     const range = document.createRange();
     range.selectNodeContents(el);
-    const sel = window.getSelection();
+    const sel = getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
   };
+  const copy = () => {
+    try {
+      navigator.clipboard.writeText(profile.email).then(
+        () => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        },
+        selectEmail
+      );
+    } catch {
+      selectEmail();
+    }
+  };
   return (
-    <section className="contact" id="contact">
-      <Marquee items={["Let’s build something", "Backend", "Automation", "AI"]} speed={28} className="mq-giant" />
-      <div className="wrap contact-inner">
-        <div className="contact-copy">
-        <p className="status mono" data-reveal><span className="pulse" aria-hidden="true" /> Open to Software, Automation &amp; AI Engineer roles</p>
-        <h2 data-reveal>Hiring for backend, automation or AI engineering? Let’s talk.</h2>
-        <div className="email-row" data-reveal>
-          <span id="email-text" className="email">{profile.email}</span>
-          <button className="btn primary" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
+    <section className="contact" id="contact" aria-labelledby="contact-h">
+      <div className="wrap">
+        <div className="contact-head" data-reveal>
+          <p className="status"><i aria-hidden="true" /> Open to Software, Automation and AI Engineer roles</p>
+          <h2 id="contact-h">Have a system that needs to run in production? Let’s talk.</h2>
+          <div className="contact-row">
+            <span id="email-text" className="email mono">{profile.email}</span>
+            <button className="btn primary" onClick={copy}>{copied ? "Copied" : "Copy email"}</button>
+            {profile.links.map((l) => (
+              <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer">
+                {l.label} <ArrowUpRight />
+              </a>
+            ))}
+          </div>
         </div>
-        <div className="cta-row" data-reveal>
-          {profile.links.map((l) => (
-            <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer">
-              {l.label} <ArrowUpRight />
-            </a>
-          ))}
-        </div>
-        </div>
-        <div className="contact-form" data-reveal="right">
+        <div className="contact-form" data-reveal>
           <ContactForm to={profile.email} handle="vipul.patil" />
         </div>
       </div>
@@ -716,8 +676,7 @@ function Contact() {
   );
 }
 
-/* Reveals every [data-reveal] element as it scrolls into view.
-   Uses a data attribute so React re-renders never undo it. */
+/* Reveals every [data-reveal] element once, as it enters the viewport */
 function useScrollReveal() {
   useEffect(() => {
     const els = [...document.querySelectorAll("[data-reveal]")];
@@ -726,9 +685,9 @@ function useScrollReveal() {
       els.forEach(show);
       return;
     }
+    const STAG = [0, 60, 110, 150, 180, 200];
     els.forEach((el) => {
       const sibs = [...el.parentElement.children].filter((c) => c.hasAttribute("data-reveal"));
-      const STAG = [0, 50, 90, 120, 145, 165, 180, 190, 200];
       el.style.setProperty("--rv-d", `${STAG[Math.min(sibs.indexOf(el), STAG.length - 1)]}ms`);
     });
     const io = new IntersectionObserver(
@@ -739,7 +698,7 @@ function useScrollReveal() {
             io.unobserve(en.target);
           }
         }),
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -6% 0px" }
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -752,35 +711,26 @@ export default function App() {
   useTilt3D();
   return (
     <>
-      <ScrollProgress />
-      <CursorRing />
+      <a className="skip" href="#main">Skip to content</a>
       <div className="bg-layer" aria-hidden="true">
-        <span className="blob b1" />
-        <span className="blob b2" />
-        <Field />
+        <Field density={0.7} />
       </div>
       <Nav />
-      <main>
+      <main id="main">
         <Hero />
-        <Ticker />
         <WhatIDo />
-        <div className="wrap">
-          <AskMyResume />
-        </div>
-        <div className="lab">
-          <div className="lab-grid" aria-hidden="true" />
-          <Field className="lab-field" density={0.6} />
-          <Metrics />
-          <Experience active={active} />
-          <Projects active={active} />
-        </div>
+        <Experience active={active} />
+        <Projects active={active} />
         <Skills active={active} setActive={setActive} />
+        <AskMyResume />
         <Education />
         <Contact />
       </main>
-      <footer className="wrap footer mono small muted" data-reveal>
-        <span>© {new Date().getFullYear()} {profile.name}</span>
-        <span>Built with React, canvas and a few too many animations</span>
+      <footer className="footer">
+        <div className="wrap footer-inner mono">
+          <span>© {new Date().getFullYear()} {profile.name} · {profile.location}</span>
+          <a className="tlink" href="#top">Back to top</a>
+        </div>
       </footer>
     </>
   );

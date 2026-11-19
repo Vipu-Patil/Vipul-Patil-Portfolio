@@ -82,6 +82,7 @@ export const metrics = [
   { value: "8h → 90m", label: "batch analytics with Spark and SQL", where: "Automation · Centene" },
   { value: "+28%", label: "PR-AUC lift on claims fraud detection", where: "AI · Centene" },
   { value: "50%", label: "less documentation time with an LLM app", where: "AI · Capgemini" },
+  { value: "−92%", label: "processing time, 2 hours to under 10 minutes", where: "Automation · PharmaPro" },
 ];
 
 export const experience = [
